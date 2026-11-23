@@ -15,7 +15,6 @@
   --green:#078345;
   --muted:#766e66;
   --border:#eee2d3;
-  --white:#fff;
   --shadow:0 8px 28px rgba(40,25,10,.09);
 }
 *{box-sizing:border-box}
@@ -76,14 +75,11 @@ main{max-width:1150px;margin:auto;padding:20px 17px 100px}
 .btn:hover{filter:brightness(.94)}
 .btn-green{background:var(--green)}
 .btn-light{background:#fff0e9;color:var(--red)}
-.section-head{margin:32px 0 17px}
-.section-head h2{margin:0 0 7px;font-size:27px}
-.section-head p{margin:0;color:var(--muted)}
 .features{
   display:grid;grid-template-columns:repeat(3,1fr);
   gap:13px;margin-top:20px;
 }
-.feature,.panel,.food-card,.plan-card,.summary-card{
+.feature,.panel,.food-card,.plan-card{
   background:#fff;border:1px solid var(--border);
   border-radius:17px;box-shadow:var(--shadow);
 }
@@ -99,8 +95,7 @@ main{max-width:1150px;margin:auto;padding:20px 17px 100px}
 }
 .food-content{padding:13px}
 .food-content h3{margin:0 0 6px;font-size:17px}
-.food-content p{font-size:13px;color:var(--muted);min-height:34px;margin:0 0 12px}
-.food-content button{width:100%;padding:10px}
+.food-content p{font-size:13px;color:var(--muted);min-height:30px;margin:0 0 12px}
 .price{color:var(--green);font-weight:900}
 .panel{padding:21px;margin:18px 0}
 .panel h2,.panel h3{margin-top:0}
@@ -122,7 +117,6 @@ main{max-width:1150px;margin:auto;padding:20px 17px 100px}
   border:1px solid var(--border);padding:12px;
   border-radius:12px;background:#fff;font-weight:700;
 }
-.choice.selected{border:2px solid var(--green);background:#effaf3}
 .choice input{accent-color:var(--green);width:18px;height:18px}
 .note{font-size:13px;color:var(--muted);line-height:1.6}
 .counter-row{
@@ -224,13 +218,14 @@ footer a{color:#ffd1bd}
         <button class="btn" onclick="openPage('daily')">Order Daily Tiffin →</button>
         <button class="btn btn-light" onclick="openPage('monthly')">Monthly Plans</button>
       </div>
-      <img class="hero-img" data-photo="IMG_295de18b-fcfa-4e41-aa24-d8eac1353a0a.jpg" alt="TIFO homemade food">
+      <img class="hero-img" data-photo="images (3).jpeg" alt="TIFO homemade food">
     </div>
 
     <div class="features">
       <div class="feature"><div>🥗</div><strong>Fresh Homemade Food</strong><span>Ghar jaisa swaad aur fresh ingredients ke saath.</span></div>
       <div class="feature"><div>🛵</div><strong>Home Delivery</strong><span>Aapke address par tiffin delivery.</span></div>
       <div class="feature"><div>📅</div><strong>Monthly Plans</strong><span>Regular meal service ke liye monthly plans.</span></div>
+    </div>
   </section>
 
   <!-- DAILY TIFFIN -->
@@ -244,35 +239,43 @@ footer a{color:#ffd1bd}
       <div class="summary-row"><strong>Daily Tiffin Price</strong><strong class="price">₹150</strong></div>
       <p class="note">Aapko neeche diye gaye options mein se exactly 2 sabzi select karni hain.</p>
       <h3>Choose Any 2 Sabzi</h3>
+
       <div class="food-grid">
-        <label class="food-card">
-          <img data-photo="IMG_4d21ed3a-bbf0-4495-9a34-3894f13560d9.jpg" alt="Aloo Matar">
+        <article class="food-card">
+          <img data-photo="images (3).jpeg" alt="Aloo Matar">
           <div class="food-content">
-            <h3>Aloo Matar</h3><p>Fresh homemade sabzi</p>
+            <h3>Aloo Matar</h3>
+            <p>Fresh homemade sabzi</p>
             <label class="choice"><input type="checkbox" name="sabzi" value="Aloo Matar" onchange="updateSabzi()"> Select</label>
           </div>
-        </label>
-        <label class="food-card">
+        </article>
+
+        <article class="food-card">
           <img data-photo="images.jpeg" alt="Matar Paneer">
           <div class="food-content">
-            <h3>Matar Paneer</h3><p>Paneer aur matar ki sabzi</p>
+            <h3>Matar Paneer</h3>
+            <p>Paneer aur matar ki sabzi</p>
             <label class="choice"><input type="checkbox" name="sabzi" value="Matar Paneer" onchange="updateSabzi()"> Select</label>
           </div>
-        </label>
-        <label class="food-card">
-          <img data-photo="IMG_295de18b-fcfa-4e41-aa24-d8eac1353a0a.jpg" alt="Dal Tadka">
+        </article>
+
+        <article class="food-card">
+          <img data-photo="images (2).jpeg" alt="Dal Tadka">
           <div class="food-content">
-            <h3>Dal Tadka</h3><p>Ghar ki tasty dal</p>
+            <h3>Dal Tadka</h3>
+            <p>Ghar ki tasty dal</p>
             <label class="choice"><input type="checkbox" name="sabzi" value="Dal Tadka" onchange="updateSabzi()"> Select</label>
           </div>
-        </label>
-        <label class="food-card">
-          <img data-photo="IMG_4d21ed3a-bbf0-4495-9a34-3894f13560d9.jpg" alt="Mix Veg">
+        </article>
+
+        <article class="food-card">
+          <img data-photo="images (1).jpeg" alt="Mix Veg">
           <div class="food-content">
-            <h3>Mix Veg</h3><p>Fresh seasonal vegetables</p>
+            <h3>Mix Veg</h3>
+            <p>Fresh seasonal vegetables</p>
             <label class="choice"><input type="checkbox" name="sabzi" value="Mix Veg" onchange="updateSabzi()"> Select</label>
           </div>
-        </label>
+        </article>
       </div>
       <p id="sabziCount" class="note">0 of 2 selected</p>
     </div>
@@ -283,6 +286,7 @@ footer a{color:#ffd1bd}
         <label class="choice"><input type="radio" name="roti" value="Sada Ghar Ki Roti (4 pieces)" checked> Sada Ghar Ki Roti – 4 pieces</label>
         <label class="choice"><input type="radio" name="roti" value="Tandoori Roti (3 pieces)"> Tandoori Roti – 3 pieces</label>
       </div>
+
       <div class="food-grid" style="margin-top:15px">
         <article class="food-card">
           <img data-photo="Trinidad+Sada+Roti.jpg" alt="Sada roti">
@@ -297,15 +301,8 @@ footer a{color:#ffd1bd}
 
     <div class="panel">
       <h3>Extra Items</h3>
-      <div class="counter-row">
-        <div><strong>🧈 Butter Roti</strong><div class="note">₹15 per piece</div></div>
-        <div class="counter">
-          <button onclick="changeQty('butter',-1)">−</button>
-          <strong id="butterQty">0</strong>
-          <button onclick="changeQty('butter',1)">+</button>
-        </div>
-      </div>
-      <div class="food-grid" style="margin-top:12px">
+
+      <div class="food-grid">
         <article class="food-card">
           <img data-photo="butterroti_a2z_shoppy.jpg" alt="Butter roti">
           <div class="food-content"><h3>Butter Roti</h3><p>Extra butter roti ₹15 each</p></div>
@@ -315,6 +312,16 @@ footer a{color:#ffd1bd}
           <div class="food-content"><h3>Water Bottle</h3><p>₹20 per bottle</p></div>
         </article>
       </div>
+
+      <div class="counter-row">
+        <div><strong>🧈 Butter Roti</strong><div class="note">₹15 per piece</div></div>
+        <div class="counter">
+          <button onclick="changeQty('butter',-1)">−</button>
+          <strong id="butterQty">0</strong>
+          <button onclick="changeQty('butter',1)">+</button>
+        </div>
+      </div>
+
       <div class="counter-row">
         <div><strong>💧 Water Bottle</strong><div class="note">₹20 per bottle</div></div>
         <div class="counter">
@@ -349,6 +356,7 @@ footer a{color:#ffd1bd}
       <h2>📅 Monthly Tiffin Plans</h2>
       <p>30 days ke liye regular homemade meal service.</p>
     </div>
+
     <div class="plan-grid">
       <div class="plan-card">
         <span class="badge">Classic Plan</span>
@@ -363,6 +371,7 @@ footer a{color:#ffd1bd}
         </ul>
         <button class="btn" style="width:100%" onclick="choosePlan('Classic',12000)">Choose Classic</button>
       </div>
+
       <div class="plan-card premium">
         <span class="badge">Premium Plan</span>
         <h3>Butter Roti Special</h3>
@@ -383,6 +392,7 @@ footer a{color:#ffd1bd}
       <p class="note">Meal timings: Morning 10:00 AM, Lunch 2:00 PM, Dinner 10:00 PM. Availability aur meal schedule business se confirm karein.</p>
       <div class="summary-row"><span>Selected Plan</span><strong id="selectedPlan">Please choose a plan</strong></div>
       <div class="summary-row"><span>Plan Price</span><strong id="selectedPlanPrice">₹0</strong></div>
+
       <div class="form-grid">
         <div class="field"><label>Your Name</label><input id="monthlyName" placeholder="Enter your name"></div>
         <div class="field"><label>Mobile Number</label><input id="monthlyPhone" type="tel" maxlength="10" placeholder="10 digit mobile number"></div>
@@ -410,18 +420,7 @@ footer a{color:#ffd1bd}
   <!-- PAYMENT -->
   <section class="page" id="payment">
     <div class="section-head"><h2>💳 Payment</h2><p>Order payment details.</p></div>
-    <div class="panel" id="paymentContent">
-      <h3>UPI Payment</h3>
-      <p>UPI ID: <strong>9458834146@ybl</strong></p>
-      <p class="note">Pay button se UPI app khulega, agar aapke phone mein UPI app installed hai.</p>
-      <button class="btn" onclick="payUPI()">Pay with UPI</button>
-      <div class="field" style="margin-top:20px">
-        <label>Payment UTR / Transaction ID</label>
-        <input id="utrInput" placeholder="Enter payment transaction ID">
-      </div>
-      <button class="btn btn-green" style="width:100%;margin-top:12px" onclick="submitPayment()">Submit Payment Details on WhatsApp</button>
-      <p class="note">Payment ki manual verification WhatsApp par hogi. Sirf UTR submit karne se payment automatically verified nahi hoti.</p>
-    </div>
+    <div class="panel" id="paymentContent"></div>
   </section>
 
   <!-- TRACK ORDER -->
@@ -471,13 +470,13 @@ let cart = JSON.parse(localStorage.getItem("tifoCart") || "[]");
 let orders = JSON.parse(localStorage.getItem("tifoOrders") || "[]");
 let currentOrder = null;
 
-/* IMAGE LOADER
-   Pehle repository root check karta hai.
-   Agar wahan photo nahi mile to images/ folder check karta hai.
+/* IMAGE FILES
+   Root folder aur images folder dono jagah photo check hogi.
 */
 document.querySelectorAll("[data-photo]").forEach(img => {
   const file = img.dataset.photo;
-  const candidates = ["./" + file, "./images/" + file];
+  const encodedFile = encodeURIComponent(file).replace(/%2B/g, "+");
+  const candidates = ["./" + encodedFile, "./images/" + encodedFile];
   let index = 0;
 
   img.onerror = function(){
@@ -509,297 +508,4 @@ function openPage(page){
   if(target) target.classList.add("active");
 
   document.querySelectorAll("[data-page]").forEach(btn=>{
-    btn.classList.toggle("active",btn.dataset.page===page);
-  });
-
-  if(page==="cart") renderCart();
-  if(page==="track") renderRecentOrders();
-  if(page==="payment") renderPayment();
-  window.scrollTo({top:0,behavior:"smooth"});
-}
-
-function updateCartCount(){
-  document.getElementById("cartCount").textContent =
-    cart.reduce((sum,item)=>sum+item.quantity,0);
-  localStorage.setItem("tifoCart",JSON.stringify(cart));
-}
-
-function updateSabzi(){
-  const selected = [...document.querySelectorAll('input[name="sabzi"]:checked')];
-  if(selected.length>2){
-    selected[selected.length-1].checked=false;
-    toast("Aap sirf 2 sabzi select kar sakte hain.");
-  }
-  const count = document.querySelectorAll('input[name="sabzi"]:checked').length;
-  document.getElementById("sabziCount").textContent = count + " of 2 selected";
-}
-
-function changeQty(type,change){
-  if(type==="butter"){
-    butterQty=Math.max(0,butterQty+change);
-    document.getElementById("butterQty").textContent=butterQty;
-  }else{
-    waterQty=Math.max(0,waterQty+change);
-    document.getElementById("waterQty").textContent=waterQty;
-  }
-  updateDailyTotal();
-}
-
-function updateDailyTotal(){
-  const butter=butterQty*15;
-  const water=waterQty*20;
-  document.getElementById("butterPrice").textContent="₹"+butter;
-  document.getElementById("waterPrice").textContent="₹"+water;
-  document.getElementById("dailyTotal").textContent="₹"+(150+butter+water);
-}
-
-function validCustomer(name,phone,address){
-  if(!name.trim()){toast("Please apna naam enter karein.");return false;}
-  if(!/^[6-9]\d{9}$/.test(phone.trim())){
-    toast("Valid 10 digit mobile number enter karein.");return false;
-  }
-  if(address.trim().length<8){toast("Complete delivery address enter karein.");return false;}
-  return true;
-}
-
-function addDailyToCart(){
-  const selected=[...document.querySelectorAll('input[name="sabzi"]:checked')].map(x=>x.value);
-  if(selected.length!==2){
-    toast("Please exactly 2 sabzi select karein.");return;
-  }
-
-  const name=document.getElementById("dailyName").value;
-  const phone=document.getElementById("dailyPhone").value;
-  const address=document.getElementById("dailyAddress").value;
-  const meal=document.getElementById("dailyMeal").value;
-
-  if(!validCustomer(name,phone,address)) return;
-
-  const roti=document.querySelector('input[name="roti"]:checked').value;
-  const item={
-    id:Date.now(),
-    type:"Daily Tiffin",
-    name:"Daily Tiffin",
-    quantity:1,
-    price:150+(butterQty*15)+(waterQty*20),
-    details:{
-      sabzi:selected,
-      roti:roti,
-      butterQty:butterQty,
-      waterQty:waterQty,
-      meal:meal,
-      customer:{name,phone,address}
-    }
-  };
-
-  cart.push(item);
-  updateCartCount();
-  toast("Daily tiffin cart mein add ho gaya!");
-  openPage("cart");
-}
-
-function choosePlan(name,price){
-  selectedPlan=name;
-  selectedPlanPrice=price;
-  document.getElementById("selectedPlan").textContent=name;
-  document.getElementById("selectedPlanPrice").textContent="₹"+price;
-  document.getElementById("monthlyForm").scrollIntoView({behavior:"smooth"});
-  toast(name+" plan selected.");
-}
-
-function addMonthlyToCart(){
-  if(!selectedPlan){toast("Pehle monthly plan choose karein.");return;}
-  const name=document.getElementById("monthlyName").value;
-  const phone=document.getElementById("monthlyPhone").value;
-  const address=document.getElementById("monthlyAddress").value;
-  const start=document.getElementById("monthlyStart").value;
-  const meal=document.getElementById("monthlyMeal").value;
-
-  if(!validCustomer(name,phone,address))return;
-  if(!start){toast("Monthly plan ki start date select karein.");return;}
-
-  cart.push({
-    id:Date.now(),
-    type:"Monthly Plan",
-    name:selectedPlan+" Monthly Plan",
-    quantity:1,
-    price:selectedPlanPrice,
-    details:{
-      startDate:start,
-      meal:meal,
-      customer:{name,phone,address}
-    }
-  });
-
-  updateCartCount();
-  toast("Monthly plan cart mein add ho gaya!");
-  openPage("cart");
-}
-
-function renderCart(){
-  const box=document.getElementById("cartContent");
-  if(!cart.length){
-    box.innerHTML='<div class="empty"><div style="font-size:45px">🛒</div><h3>Your cart is empty</h3><p>Apna favourite tiffin add karein.</p><button class="btn" onclick="openPage(\'daily\')">Order Now</button></div>';
-    return;
-  }
-
-  let total=0;
-  let html="";
-  cart.forEach((item,index)=>{
-    total+=item.price*item.quantity;
-    const customer=item.details.customer;
-    html+=`
-      <div class="order-box">
-        <div class="summary-row"><strong>${escapeHTML(item.name)}</strong><strong class="price">₹${item.price}</strong></div>
-        <p class="note">Type: ${escapeHTML(item.type)}</p>
-        ${item.details.sabzi?`<p>Sabzi: ${item.details.sabzi.map(escapeHTML).join(", ")}</p>`:""}
-        ${item.details.roti?`<p>Roti: ${escapeHTML(item.details.roti)}</p>`:""}
-        ${item.details.butterQty?`<p>Extra butter roti: ${item.details.butterQty}</p>`:""}
-        ${item.details.waterQty?`<p>Water bottle: ${item.details.waterQty}</p>`:""}
-        ${item.details.startDate?`<p>Start date: ${escapeHTML(item.details.startDate)}</p>`:""}
-        ${item.details.meal?`<p>Meal: ${escapeHTML(item.details.meal)}</p>`:""}
-        <p class="note">${escapeHTML(customer.name)} • ${escapeHTML(customer.phone)}<br>${escapeHTML(customer.address)}</p>
-        <button class="btn btn-light" onclick="removeCartItem(${index})">Remove</button>
-      </div>`;
-  });
-
-  html+=`<div class="summary-row total-row"><span>Grand Total</span><strong>₹${total}</strong></div>
-    <button class="btn" style="width:100%;margin-top:15px" onclick="goPayment()">Proceed to Payment →</button>`;
-  box.innerHTML=html;
-}
-
-function escapeHTML(value){
-  return String(value??"").replace(/[&<>"']/g,char=>({
-    "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
-  })[char]);
-}
-
-function removeCartItem(index){
-  cart.splice(index,1);
-  updateCartCount();
-  renderCart();
-}
-
-function goPayment(){
-  if(!cart.length){toast("Aapka cart empty hai.");return;}
-
-  const total=cart.reduce((sum,item)=>sum+item.price*item.quantity,0);
-  const customer=cart[0].details.customer;
-  const order={
-    id:"TIFO"+Date.now().toString().slice(-8),
-    date:new Date().toLocaleString("en-IN"),
-    status:"Payment Pending",
-    total:total,
-    customer:customer,
-    items:cart
-  };
-
-  currentOrder=order;
-  orders.unshift(order);
-  localStorage.setItem("tifoOrders",JSON.stringify(orders));
-  openPage("payment");
-}
-
-function renderPayment(){
-  const box=document.getElementById("paymentContent");
-  if(!currentOrder){
-    box.innerHTML="<p>No active order found. Please add items to cart first.</p><button class='btn' onclick=\"openPage('daily')\">Order Now</button>";
-    return;
-  }
-  box.innerHTML=`
-    <h3>Order Summary</h3>
-    <div class="summary-row"><span>Order ID</span><strong>${currentOrder.id}</strong></div>
-    <div class="summary-row"><span>Customer</span><strong>${escapeHTML(currentOrder.customer.name)}</strong></div>
-    <div class="summary-row"><span>Amount</span><strong class="price">₹${currentOrder.total}</strong></div>
-    <p>UPI ID: <strong>${UPI_ID}</strong></p>
-    <button class="btn" onclick="payUPI()">Pay with UPI</button>
-    <div class="field" style="margin-top:20px">
-      <label>Payment UTR / Transaction ID</label>
-      <input id="utrInput" placeholder="Enter payment transaction ID">
-    </div>
-    <button class="btn btn-green" style="width:100%;margin-top:12px" onclick="submitPayment()">Submit Payment Details on WhatsApp</button>
-    <p class="note">Payment verification manually WhatsApp par hogi. UTR submit karna payment confirmation nahi hai.</p>`;
-}
-
-function payUPI(){
-  if(!currentOrder){toast("Order not found.");return;}
-  const url="upi://pay?pa="+encodeURIComponent(UPI_ID)+
-    "&pn="+encodeURIComponent("TIFO Ghar Jaisa Khana")+
-    "&am="+currentOrder.total+"&cu=INR"+
-    "&tn="+encodeURIComponent(currentOrder.id);
-  window.location.href=url;
-}
-
-function submitPayment(){
-  if(!currentOrder){toast("Order not found.");return;}
-  const utr=document.getElementById("utrInput").value.trim();
-  if(utr.length<6){toast("Please valid UTR / transaction ID enter karein.");return;}
-
-  const index=orders.findIndex(o=>o.id===currentOrder.id);
-  if(index>=0){
-    orders[index].utr=utr;
-    orders[index].status="Payment Verification Pending";
-    currentOrder=orders[index];
-    localStorage.setItem("tifoOrders",JSON.stringify(orders));
-  }
-
-  const message=
-`Hello TIFO, I have submitted my payment details.
-
-Order ID: ${currentOrder.id}
-Name: ${currentOrder.customer.name}
-Mobile: ${currentOrder.customer.phone}
-Amount: ₹${currentOrder.total}
-UTR: ${utr}
-
-Please verify my payment and confirm my order.`;
-
-  window.open("https://wa.me/"+WHATSAPP_NUMBER+"?text="+encodeURIComponent(message),"_blank");
-  cart=[];
-  updateCartCount();
-  toast("WhatsApp par payment details bhejein.");
-  openPage("track");
-  document.getElementById("trackInput").value=currentOrder.id;
-  trackOrder();
-}
-
-function trackOrder(){
-  const id=document.getElementById("trackInput").value.trim();
-  const result=document.getElementById("trackResult");
-  const order=orders.find(o=>o.id.toLowerCase()===id.toLowerCase());
-
-  if(!order){
-    result.innerHTML='<p class="note">Is browser mein ye order ID nahi mili. Order ID check karein.</p>';
-    return;
-  }
-
-  result.innerHTML=`
-    <div class="order-box">
-      <h3>${order.id}</h3>
-      <p>Status: <span class="status">${escapeHTML(order.status)}</span></p>
-      <p>Amount: ₹${order.total}</p>
-      <p>Order Date: ${escapeHTML(order.date)}</p>
-      <p class="note">Order details isi browser mein save hain.</p>
-    </div>`;
-}
-
-function renderRecentOrders(){
-  const box=document.getElementById("recentOrders");
-  if(!orders.length){
-    box.innerHTML='<p class="empty">Abhi koi order save nahi hai.</p>';
-    return;
-  }
-  box.innerHTML=orders.slice(0,5).map(order=>`
-    <div class="order-box">
-      <strong>${order.id}</strong>
-      <p>₹${order.total} • ${escapeHTML(order.status)}</p>
-      <button class="btn btn-light" onclick="document.getElementById('trackInput').value='${order.id}';trackOrder()">View Order</button>
-    </div>`).join("");
-}
-
-updateCartCount();
-updateDailyTotal();
-renderRecentOrders();
-</script>
-</body>
-</html>
+    btn.clas
