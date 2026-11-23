@@ -21,7 +21,7 @@ nav{max-width:1100px;margin:auto;padding:0 15px 13px;display:grid;grid-template-
 .tab{border:0;background:#f3e8dc;padding:15px 5px;border-radius:15px;color:#675b52;font-weight:bold}
 .tab.active{background:var(--red);color:white;box-shadow:0 5px 15px #ed3e1330}
 main{max-width:1100px;margin:auto;padding:25px 15px 70px}
-.hero{background:linear-gradient(115deg,#c92d08,#ff6338);color:white;border-radius:28px;padding:30px;margin-bottom:25px;position:relative;overflow:hidden}
+.hero{background:linear-gradient(115deg,#c92d08,#ff6338);color:white;border-radius:28px;padding:30px;margin-bottom:25px}
 .hero h2{font-size:clamp(27px,5vw,43px);margin:15px 0}
 .hero p{line-height:1.6;max-width:680px}
 .pricebox{display:inline-block;background:white;color:var(--red);padding:14px 24px;border-radius:17px;font-size:30px;font-weight:900;margin-top:10px}
@@ -31,7 +31,7 @@ h2,h3{line-height:1.2}
 .panel h2{margin:8px 0 15px;font-size:27px}
 .muted{color:#80766d;line-height:1.5}
 .grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
-.food{border:2px solid var(--border);border-radius:19px;overflow:hidden;background:white;cursor:pointer;transition:.2s;position:relative}
+.food{border:2px solid var(--border);border-radius:19px;overflow:hidden;background:white;cursor:pointer;transition:.15s;position:relative;user-select:none}
 .food.selected{border-color:var(--red);background:#fff7f3;box-shadow:0 4px 14px #ed3e1320}
 .food img{width:100%;height:155px;object-fit:cover;display:block;background:#f1e7db}
 .food .foodname{padding:12px;font-weight:bold}
@@ -43,13 +43,13 @@ h2,h3{line-height:1.2}
 .inc-card img{width:54px;height:54px;object-fit:cover;border-radius:10px;flex-shrink:0}
 .profit-box{background:#fff8e6;border:1px solid #f5cf76;color:#7a4b00;padding:15px;border-radius:16px;margin-top:14px;line-height:1.6;font-weight:bold}
 .roti-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
-.roti{border:2px solid var(--border);border-radius:17px;padding:12px;cursor:pointer;background:white}
+.roti{border:2px solid var(--border);border-radius:17px;padding:12px;cursor:pointer;background:white;user-select:none}
 .roti.active{border-color:var(--red);background:#fff6f1}
 .roti img{width:100%;height:115px;object-fit:cover;border-radius:12px;display:block}
 .extra-box{display:flex;align-items:center;gap:13px;border:1px solid var(--border);border-radius:17px;padding:12px;margin-top:15px;background:white}
 .extra-box img{width:76px;height:76px;object-fit:cover;border-radius:12px;flex-shrink:0}
 .qty{display:flex;align-items:center;gap:12px;margin-left:auto}
-.qty button{width:35px;height:35px;border:1px solid var(--border);border-radius:10px;background:#fffaf3;font-weight:bold}
+.qty button{width:38px;height:38px;border:1px solid var(--border);border-radius:10px;background:#fffaf3;font-weight:bold;font-size:18px}
 .fields{display:grid;grid-template-columns:1fr 1fr;gap:13px}
 .field{display:flex;flex-direction:column;gap:7px}
 .field label{font-size:13px;font-weight:bold;color:#6c625b}
@@ -68,10 +68,10 @@ h2,h3{line-height:1.2}
 .meal{border:1px solid var(--border);padding:15px;border-radius:16px;margin:12px 0}
 .meal h3{margin:0 0 10px}
 .menu-list{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
-.menu-option{border:1px solid var(--border);padding:11px;border-radius:11px;cursor:pointer;font-size:14px;background:white}
+.menu-option{border:1px solid var(--border);padding:11px;border-radius:11px;cursor:pointer;font-size:14px;background:white;user-select:none}
 .menu-option.selected{border:2px solid var(--red);background:#fff6f1;font-weight:bold}
 .time{color:var(--green);font-size:13px;font-weight:bold}
-.plan{border:2px solid var(--border);border-radius:18px;padding:17px;margin:12px 0;cursor:pointer;background:white}
+.plan{border:2px solid var(--border);border-radius:18px;padding:17px;margin:12px 0;cursor:pointer;background:white;user-select:none}
 .plan.active{border-color:var(--red);background:#fff7f3}
 .planprice{font-size:27px;color:var(--red);font-weight:900}
 .bill{background:#fff7ef;border-radius:16px;padding:15px;margin-top:15px;line-height:1.7}
@@ -102,9 +102,9 @@ footer{background:#211c18;color:white;text-align:center;padding:25px;font-size:1
   <a class="whatsapp" href="https://wa.me/917599044129" target="_blank">☏ WhatsApp Help</a>
  </div>
  <nav>
-  <button class="tab active" onclick="showView('daily',this)">One-Time ₹150</button>
-  <button class="tab" onclick="showView('monthly',this)">Monthly Plan</button>
-  <button class="tab" onclick="showView('tracking',this)">Track Order</button>
+  <button type="button" class="tab active" id="tab-daily" onclick="showView('daily',this)">One-Time ₹150</button>
+  <button type="button" class="tab" id="tab-monthly" onclick="showView('monthly',this)">Monthly Plan</button>
+  <button type="button" class="tab" id="tab-tracking" onclick="showView('tracking',this)">Track Order</button>
  </nav>
 </header>
 
@@ -128,11 +128,11 @@ footer{background:#211c18;color:white;text-align:center;padding:25px;font-size:1
     ✓ AUTOMATICALLY INCLUDED (PLAIN RICE + BOONDI RAITA + SALAD + PICKLE)
     <div class="included-photos">
      <div class="inc-card">
-      <img src="./1000080202_2.jpg" alt="Plain Rice" data-fallback="https://images.unsplash.com/photo-1516684732162-798a0062be99?w=300" onerror="handleImgErr(this)">
+      <img src="https://images.unsplash.com/photo-1516684732162-798a0062be99?w=300" alt="Plain Rice">
       <div><b>Plain Rice</b><br><span class="small">Auto Included</span></div>
      </div>
      <div class="inc-card">
-      <img src="./1000080203_2.jpg" alt="Boondi Raita" data-fallback="https://images.unsplash.com/photo-1631452180519-c014fe946bc7?w=300" onerror="handleImgErr(this)">
+      <img src="https://images.unsplash.com/photo-1631452180519-c014fe946bc7?w=300" alt="Boondi Raita">
       <div><b>Boondi Raita</b><br><span class="small">Auto Included</span></div>
      </div>
     </div>
@@ -141,24 +141,24 @@ footer{background:#211c18;color:white;text-align:center;padding:25px;font-size:1
   <div class="panel">
    <span class="step">STEP 2</span><h2>Select Roti Type</h2>
    <div class="roti-grid">
-    <div class="roti active" onclick="chooseRoti('Sada Ghar Ki Roti',this)">
-     <img src="./Trinidad+Sada+Roti.jpg" alt="Sada Ghar Ki Roti" data-fallback="https://images.unsplash.com/photo-1626074353765-517a681e40be?w=500" onerror="handleImgErr(this)">
+    <div class="roti active" id="roti-sada" onclick="chooseRoti('Sada Ghar Ki Roti',this)">
+     <img src="https://images.unsplash.com/photo-1626074353765-517a681e40be?w=500" alt="Sada Ghar Ki Roti">
      <b>Sada Ghar Ki Roti</b><p class="small">4 soft ghar ke aate ki rotis · Included</p>
     </div>
-    <div class="roti" onclick="chooseRoti('Tandoori Roti',this)">
-     <img src="./tandoori-roti-recipe.jpg" alt="Tandoori Roti" data-fallback="https://images.unsplash.com/photo-1585937421612-70a008356fbe?w=500" onerror="handleImgErr(this)">
+    <div class="roti" id="roti-tandoori" onclick="chooseRoti('Tandoori Roti',this)">
+     <img src="https://images.unsplash.com/photo-1585937421612-70a008356fbe?w=500" alt="Tandoori Roti">
      <b>Tandoori Roti</b><p class="small">3 tandoori rotis · Included</p>
     </div>
    </div>
    <div class="extra-box">
-    <img src="./1000080208.jpg" alt="Water Bottle" data-fallback="https://images.unsplash.com/photo-1602143407151-7111542de6e8?w=300" onerror="handleImgErr(this)">
+    <img src="https://images.unsplash.com/photo-1602143407151-7111542de6e8?w=300" alt="Water Bottle">
     <div><b>Water Bottle</b><p class="small">Optional · ₹20 each</p></div>
     <div class="qty">
      <button type="button" onclick="changeWater(-1)">−</button><b id="waterQty">0</b><button type="button" onclick="changeWater(1)">+</button>
     </div>
    </div>
    <div class="extra-box">
-    <img src="./butterroti_a2z_shoppy.jpg" alt="Butter Roti" data-fallback="https://images.unsplash.com/photo-1626074353765-517a681e40be?w=300" onerror="handleImgErr(this)">
+    <img src="https://images.unsplash.com/photo-1565557623262-b51c2513a641?w=300" alt="Butter Roti">
     <div><b>Butter Roti</b><p class="small">Optional · ₹15 each</p></div>
     <div class="qty">
      <button type="button" onclick="changeButter(-1)">−</button><b id="butterQty">0</b><button type="button" onclick="changeButter(1)">+</button>
@@ -310,42 +310,57 @@ footer{background:#211c18;color:white;text-align:center;padding:25px;font-size:1
 </footer>
 
 <script>
-const UPI="9458834146@ybl";
-const PHONE="7599044129";
+var UPI = "9458834146@ybl";
+var PHONE = "7599044129";
 
-function handleImgErr(img){
- if(img.dataset.done)return;
- img.dataset.done="1";
- img.src=img.dataset.fallback||"https://images.unsplash.com/photo-1585937421612-70a008356fbe?w=500";
-}
-
-const SABZIS=[
- {name:"Aloo Matar",img:"./1000080207.jpg",fallback:"https://images.unsplash.com/photo-1601050690597-df0568f70950?w=600"},
- {name:"Matar Paneer",img:"./1000080204_2.jpg",fallback:"https://images.unsplash.com/photo-1631452180519-c014fe946bc7?w=600"},
- {name:"Dal Tadka",img:"./1000080206_2.jpg",fallback:"https://images.unsplash.com/photo-1546833999-b9f581a1996d?w=600"},
- {name:"Mix Veg",img:"./1000080205_2.jpg",fallback:"https://images.unsplash.com/photo-1585937421612-70a008356fbe?w=600"}
+var SABZIS = [
+ { name: "Aloo Matar", img: "https://images.unsplash.com/photo-1601050690597-df0568f70950?w=600" },
+ { name: "Matar Paneer", img: "https://images.unsplash.com/photo-1631452180519-c014fe946bc7?w=600" },
+ { name: "Dal Tadka", img: "https://images.unsplash.com/photo-1546833999-b9f581a1996d?w=600" },
+ { name: "Mix Veg", img: "https://images.unsplash.com/photo-1585937421612-70a008356fbe?w=600" }
 ];
 
-let selectedSabzis=[],roti="Sada Ghar Ki Roti",water=0,butter=0;
-let plan="regular",morning="Poha",lunch="Dal Chawal",dinner="Matar Paneer";
-let currentOrder=null;
-let orders=[];
-try{orders=JSON.parse(localStorage.getItem("tifoOrders")||"[]");}catch(e){orders=[];}
+var selectedSabzis = [];
+var roti = "Sada Ghar Ki Roti";
+var water = 0;
+var butter = 0;
+var plan = "regular";
+var morning = "Poha";
+var lunch = "Dal Chawal";
+var dinner = "Matar Paneer";
+var currentOrder = null;
+var orders = [];
+try { orders = JSON.parse(localStorage.getItem("tifoOrders") || "[]"); } catch (e) { orders = []; }
 
-function showView(id,btn){
- document.querySelectorAll(".view").forEach(function(x){x.classList.remove("active");});
- const target=document.getElementById(id);
- if(target)target.classList.add("active");
- document.querySelectorAll(".tab").forEach(function(x){x.classList.remove("active");});
- if(btn)btn.classList.add("active");
- window.scrollTo({top:0,behavior:"smooth"});
+function showView(id, btn) {
+ var views = document.querySelectorAll(".view");
+ for (var i = 0; i < views.length; i++) views[i].classList.remove("active");
+ var target = document.getElementById(id);
+ if (target) target.classList.add("active");
+ var tabs = document.querySelectorAll(".tab");
+ for (var j = 0; j < tabs.length; j++) tabs[j].classList.remove("active");
+ var activeTab = btn || document.getElementById("tab-" + id);
+ if (activeTab) activeTab.classList.add("active");
+ window.scrollTo(0, 0);
 }
 
-function renderSabzis(){
- const grid=document.getElementById("sabziGrid");
- if(!grid)return;
- grid.innerHTML=SABZIS.map(function(s){
-  const active=selectedSabzis.includes(s.name);
-  return '<div class="food '+(active?"selected":"")+'" onclick="toggleSabzi(\''+s.name+'\')">'+
-   '<span class="tick">'+(active?"✓":"+")+'</span>'+
-   '<img src
+function renderSabzis() {
+ var grid = document.getElementById("sabziGrid");
+ if (!grid) return;
+ var html = "";
+ for (var i = 0; i < SABZIS.length; i++) {
+  var s = SABZIS[i];
+  var active = selectedSabzis.indexOf(s.name) !== -1;
+  html += '<div class="food ' + (active ? "selected" : "") + '" onclick="toggleSabzi(\'' + s.name + '\')">' +
+   '<span class="tick">' + (active ? "✓" : "+") + '</span>' +
+   '<img src="' + s.img + '" alt="' + s.name + '">' +
+   '<div class="foodname">' + s.name + '</div></div>';
+ }
+ grid.innerHTML = html;
+ updateDaily();
+}
+
+function toggleSabzi(name) {
+ var idx = selectedSabzis.indexOf(name);
+ if (idx !== -1) {
+  selectedSab
