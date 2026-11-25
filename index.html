@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -27,7 +26,6 @@ main{max-width:1100px;margin:auto;padding:20px 17px}
 .hero{background:linear-gradient(115deg,#291d17,#5b2819);color:white;border-radius:22px;padding:35px 28px;display:grid;grid-template-columns:1.2fr .8fr;gap:20px;align-items:center;overflow:hidden}
 .hero h1{font-size:clamp(32px,5vw,53px);line-height:1.08;margin:10px 0}
 .hero p{color:#f5dfd1;line-height:1.6}
-.hero img{width:100%;height:240px;object-fit:cover;border-radius:17px}
 .eyebrow{color:#ffb69d;font-size:12px;font-weight:900;letter-spacing:2px}
 .btn{border:0;border-radius:11px;padding:13px 18px;font-weight:800;background:var(--red);color:white}
 .btn:hover{filter:brightness(.94)}
@@ -36,6 +34,76 @@ main{max-width:1100px;margin:auto;padding:20px 17px}
 .btn.dark{background:var(--dark)}
 .btn.light{background:#f5eee6;color:var(--dark)}
 .btn:disabled{opacity:.5;cursor:not-allowed}
+
+/* Cute Cat + Thinking Pop-up Styles */
+.cat-stage{
+  position:relative;
+  background:radial-gradient(circle at top,#fff7ee,#f6e2ce);
+  border:2px solid rgba(255,214,186,.45);
+  border-radius:18px;
+  padding:58px 16px 14px;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  min-height:240px;
+  box-shadow:inset 0 2px 10px rgba(0,0,0,.08);
+}
+.thinking-popup{
+  position:absolute;
+  top:10px;
+  left:50%;
+  transform:translateX(-50%);
+  background:#ffffff;
+  color:#211c18;
+  font-size:13px;
+  font-weight:800;
+  padding:8px 14px;
+  border-radius:16px;
+  border:2px solid #211c18;
+  box-shadow:0 6px 16px rgba(0,0,0,.18);
+  white-space:nowrap;
+  z-index:2;
+  animation:floatBubble 2.6s ease-in-out infinite;
+}
+.thinking-popup::after{
+  content:"";
+  position:absolute;
+  bottom:-8px;
+  left:50%;
+  transform:translateX(-50%);
+  width:10px;
+  height:10px;
+  background:#ffffff;
+  border-right:2px solid #211c18;
+  border-bottom:2px solid #211c18;
+  border-radius:50%;
+}
+.thinking-popup::before{
+  content:"";
+  position:absolute;
+  bottom:-16px;
+  left:calc(50% + 4px);
+  width:6px;
+  height:6px;
+  background:#ffffff;
+  border:2px solid #211c18;
+  border-radius:50%;
+}
+.cute-cat-svg{
+  width:145px;
+  height:145px;
+  animation:catBob 3s ease-in-out infinite;
+}
+@keyframes floatBubble{
+  0%,100%{transform:translateX(-50%) translateY(0px)}
+  50%{transform:translateX(-50%) translateY(-4px)}
+}
+@keyframes catBob{
+  0%,100%{transform:translateY(0px)}
+  50%{transform:translateY(3px)}
+}
+
 .section-title{font-size:25px;margin:27px 0 14px}
 .features,.plans,.food-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:15px}
 .feature,.card,.panel,.plan{background:#fff;border:1px solid var(--border);border-radius:17px;padding:17px}
@@ -82,7 +150,9 @@ footer{text-align:center;padding:25px 15px;color:var(--muted);font-size:12px}
 @media(max-width:760px){
  nav{display:none}
  .hero{grid-template-columns:1fr;padding:25px 20px}
- .hero img{height:190px}
+ .cat-stage{min-height:205px;padding-top:54px}
+ .thinking-popup{font-size:12px;padding:7px 12px}
+ .cute-cat-svg{width:125px;height:125px}
  .features{grid-template-columns:1fr}
  .food-grid{grid-template-columns:repeat(2,1fr)}
  .plans{grid-template-columns:1fr}
@@ -121,7 +191,46 @@ footer{text-align:center;padding:25px 15px;color:var(--muted);font-size:12px}
    <button class="btn" onclick="openPage('daily')">Order Daily Tiffin →</button>
    <button class="btn secondary" onclick="openPage('monthly')">Monthly Plans</button>
   </div>
-  <img src="./images.jpeg" alt="Matar Paneer" onerror="this.style.display='none'">
+
+  <!-- Cute Cat + Thinking Pop-up -->
+  <div class="cat-stage" aria-label="Cute cat thinking pop-up">
+   <div class="thinking-popup">ji apke pet ko meri yaad nhi ati</div>
+   <svg class="cute-cat-svg" viewBox="0 0 160 160" xmlns="http://www.w3.org/2000/svg">
+    <!-- Tail -->
+    <path d="M112 126 Q142 118 136 92 Q132 78 120 84" fill="none" stroke="#f4974c" stroke-width="9" stroke-linecap="round"/>
+    <!-- Body -->
+    <ellipse cx="80" cy="118" rx="34" ry="27" fill="#ffa95e"/>
+    <ellipse cx="80" cy="121" rx="20" ry="18" fill="#fff2e2"/>
+    <!-- Paws -->
+    <ellipse cx="62" cy="140" rx="10" ry="6" fill="#ffa95e"/>
+    <ellipse cx="98" cy="140" rx="10" ry="6" fill="#ffa95e"/>
+    <!-- Ears -->
+    <polygon points="46,66 39,34 69,50" fill="#ffa95e"/>
+    <polygon points="49,61 44,41 63,52" fill="#ff9eb5"/>
+    <polygon points="114,66 121,34 91,50" fill="#ffa95e"/>
+    <polygon points="111,61 116,41 97,52" fill="#ff9eb5"/>
+    <!-- Head -->
+    <ellipse cx="80" cy="74" rx="40" ry="33" fill="#ffa95e"/>
+    <!-- Forehead stripes -->
+    <path d="M80 42 L80 54 M71 44 L73 53 M89 44 L87 53" stroke="#e07d32" stroke-width="3" stroke-linecap="round"/>
+    <!-- Eyes -->
+    <circle cx="64" cy="73" r="8" fill="#211c18"/>
+    <circle cx="96" cy="73" r="8" fill="#211c18"/>
+    <circle cx="61.5" cy="70" r="3" fill="#ffffff"/>
+    <circle cx="93.5" cy="70" r="3" fill="#ffffff"/>
+    <!-- Rosy Cheeks -->
+    <ellipse cx="52" cy="83" rx="6.5" ry="4" fill="#ff8fa3" opacity="0.7"/>
+    <ellipse cx="108" cy="83" rx="6.5" ry="4" fill="#ff8fa3" opacity="0.7"/>
+    <!-- Nose & Mouth -->
+    <polygon points="76,79 84,79 80,84" fill="#ff6b8b"/>
+    <path d="M72 88 Q76 93 80 87 Q84 93 88 88" fill="none" stroke="#211c18" stroke-width="2.5" stroke-linecap="round"/>
+    <!-- Whiskers -->
+    <line x1="32" y1="74" x2="48" y2="77" stroke="#211c18" stroke-width="2" stroke-linecap="round"/>
+    <line x1="31" y1="83" x2="47" y2="83" stroke="#211c18" stroke-width="2" stroke-linecap="round"/>
+    <line x1="128" y1="74" x2="112" y2="77" stroke="#211c18" stroke-width="2" stroke-linecap="round"/>
+    <line x1="129" y1="83" x2="113" y2="83" stroke="#211c18" stroke-width="2" stroke-linecap="round"/>
+   </svg>
+  </div>
  </div>
 
  <h2 class="section-title">TIFO par aapko kya milega?</h2>
@@ -295,101 +404,12 @@ function saveCart(){
  updateCartCount();
 }
 
+function saveOrders(){
+ localStorage.setItem("tifoOrders",JSON.stringify(orders));
+}
+
 function updateCartCount(){
  document.getElementById("cartCount").textContent=cart.length;
 }
 
-function getPhone(id){
- return document.getElementById(id).value.trim().replace(/\s+/g,"");
-}
-
-function validDetails(name,phone,address){
- if(!name){toast("Please apna naam enter karein.");return false;}
- if(!/^[6-9]\d{9}$/.test(phone)){toast("Sahi 10 digit mobile number enter karein.");return false;}
- if(address.length<8){toast("Please poora delivery address enter karein.");return false;}
- return true;
-}
-
-function selectedSabzis(){
- return [...document.querySelectorAll('input[name="sabzi"]:checked')].map(x=>x.value);
-}
-
-function updateDailyTotal(){
- const butter=butterQty*15;
- const water=waterQty*20;
- document.getElementById("butterQty").textContent=butterQty;
- document.getElementById("waterQty").textContent=waterQty;
- document.getElementById("butterPrice").textContent="₹"+butter;
- document.getElementById("waterPrice").textContent="₹"+water;
- document.getElementById("dailyTotal").textContent="₹"+(150+butter+water);
-}
-
-function changeQty(type,amount){
- if(type==="butter")butterQty=Math.max(0,Math.min(20,butterQty+amount));
- if(type==="water")waterQty=Math.max(0,Math.min(20,waterQty+amount));
- updateDailyTotal();
-}
-
-function addDailyToCart(){
- const sabzis=selectedSabzis();
- if(sabzis.length!==2){toast("Please exactly 2 sabzi select karein.");return;}
- const name=document.getElementById("dailyName").value.trim();
- const phone=getPhone("dailyPhone");
- const address=document.getElementById("dailyAddress").value.trim();
- const meal=document.getElementById("dailyMeal").value;
- if(!validDetails(name,phone,address))return;
- const roti=document.querySelector('input[name="roti"]:checked').value;
- const total=150+(butterQty*15)+(waterQty*20);
- cart.push({
-  id:Date.now(),type:"Daily Tiffin",name,phone,address,meal,
-  sabzis,roti,butterQty,waterQty,total
- });
- saveCart();
- toast("Daily Tiffin cart mein add ho gaya!");
- openPage("cart");
-}
-
-function choosePlan(plan){
- selectedPlan=plan;
- document.getElementById("classicPlan").classList.toggle("selected",plan==="Classic");
- document.getElementById("premiumPlan").classList.toggle("selected",plan==="Premium");
- document.getElementById("selectedPlanTitle").textContent=plan+" Plan – ₹"+(plan==="Classic"?"12,000":"13,800");
- document.getElementById("monthly").scrollIntoView({behavior:"smooth"});
-}
-
-function addMonthlyToCart(){
- const name=document.getElementById("monthlyName").value.trim();
- const phone=getPhone("monthlyPhone");
- const address=document.getElementById("monthlyAddress").value.trim();
- const start=document.getElementById("monthlyStart").value;
- const meal=document.getElementById("monthlyMeal").value;
- if(!validDetails(name,phone,address))return;
- if(!start){toast("Please plan start date choose karein.");return;}
- const total=selectedPlan==="Classic"?12000:13800;
- cart.push({
-  id:Date.now(),type:"Monthly "+selectedPlan+" Plan",name,phone,address,
-  start,meal,total,plan:selectedPlan
- });
- saveCart();
- toast("Monthly plan cart mein add ho gaya!");
- openPage("cart");
-}
-
-function money(n){return "₹"+Number(n).toLocaleString("en-IN");}
-
-function escapeHTML(value){
- return String(value??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
-}
-
-function renderCart(){
- const box=document.getElementById("cartContent");
- if(!cart.length){
-  box.innerHTML='<div class="empty"><div style="font-size:45px">🛒</div><h3>Your cart is empty</h3><p>Apna favourite tiffin add karein.</p><button class="btn" onclick="openPage(\'daily\')">Explore Daily Tiffin</button></div>';
-  return;
- }
- let total=0;
- let html="";
- cart.forEach((item,index)=>{
-  total+=Number(item.total);
-  let details=item.type==="Daily Tiffin"
-   ?`<p class="muted">Sabzi: ${item.sabzis.map(escapeHTML).join(", ")}<br>Roti: ${escapeHTML(item.roti)}<br>Butter roti: ${item.butterQty} | Water: ${item
+function 
