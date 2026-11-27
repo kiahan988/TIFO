@@ -430,10 +430,11 @@ footer{text-align:center;padding:25px 15px;color:var(--muted);font-size:12px}
  <div class="panel">
   <h3>3. Parcel Information</h3>
   <div class="form-grid">
+   <div><label>What are you sending?</label><select id="parcelCategory"><option value="parcel">Parcel / Other Items</option><option value="lunchbox">Lunch Box</option><option value="documents">Documents</option></select></div>
    <div><label>Parcel Weight (kg)</label><input id="parcelWeight" type="number" min="0.1" step="0.1" placeholder="Example: 2"></div>
-   <div><label>What are you sending?</label><input id="parcelDescription" placeholder="Documents, clothes, gift..."></div>
   </div>
-  <div class="notice" style="margin-top:12px">Delivery charge: ₹30 per km for parcels up to 5 kg. Above 5 kg, ₹10 extra per additional kg is added.</div>
+  <label>Item details</label><input id="parcelDescription" placeholder="Documents, clothes, gift, lunch box...">
+  <div class="notice" style="margin-top:12px">Lunch Box / Documents (3 kg tak): pehle 2 km ₹20, uske baad ₹15 per km. 3 kg se zyada ya baaki bade parcels: ₹30 per km (5 kg tak); 5 kg se zyada par ₹10 per extra kg.</div>
   <button class="btn" style="width:100%;margin-top:14px" onclick="calculateParcelFare()">Calculate Distance & Delivery Charge</button>
   <div id="parcelFareResult" class="summary" style="display:none"></div>
   <button class="btn green" id="addParcelButton" style="width:100%;margin-top:12px;display:none" onclick="addParcelToCart()">Add Parcel to Cart</button>
@@ -678,12 +679,21 @@ async function calculateParcelFare(){
   const routeData=await routeResponse.json();
   if(routeData.code!=="Ok"||!routeData.routes||!routeData.routes.length)throw new Error("Driving route not found");
   const distanceKm=routeData.routes[0].distance/1000;
-  const extraWeight=Math.max(0,weight-5);
-  const distanceCharge=Math.ceil(distanceKm*30);
-  const extraWeightCharge=Math.ceil(extraWeight*10);
+  const category=document.getElementById("parcelCategory").value;
+  const specialRate=(weight<=3 && (category==="lunchbox" || category==="documents"));
+  let distanceCharge=0,extraWeightCharge=0,rateText="";
+  if(specialRate){
+   distanceCharge=20+Math.ceil(Math.max(0,distanceKm-2)*15);
+   rateText="Lunch Box / Documents rate: first 2 km ₹20, then ₹15/km";
+  }else{
+   const extraWeight=Math.max(0,weight-5);
+   distanceCharge=Math.ceil(distanceKm*30);
+   extraWeightCharge=Math.ceil(extraWeight*10);
+   rateText="Standard parcel rate: ₹30/km up to 5 kg; above 5 kg +₹10 per extra kg";
+  }
   const total=distanceCharge+extraWeightCharge;
-  parcelQuote={senderName,senderPhone,pickup,receiverName,receiverPhone,drop,weight,description,distanceKm,distanceCharge,extraWeightCharge,total,pickupLocation:from,dropLocation:to};
-  result.innerHTML="<div class='rowline'><span>Driving distance</span><b>"+distanceKm.toFixed(1)+" km</b></div><div class='rowline'><span>Distance charge (₹30/km)</span><b>"+money(distanceCharge)+"</b></div><div class='rowline'><span>Extra weight charge</span><b>"+money(extraWeightCharge)+"</b></div><div class='rowline'><b>Total delivery charge</b><b class='total'>"+money(total)+"</b></div><p class='muted'>Distance aur fare route estimate ke hisaab se calculate kiya gaya hai.</p>";
+  parcelQuote={senderName,senderPhone,pickup,receiverName,receiverPhone,drop,weight,description,category,distanceKm,distanceCharge,extraWeightCharge,total,pickupLocation:from,dropLocation:to};
+  result.innerHTML="<div class='rowline'><span>Driving distance</span><b>"+distanceKm.toFixed(1)+" km</b></div><div class='rowline'><span>Rate</span><b>"+rateText+"</b></div><div class='rowline'><span>Distance charge</span><b>"+money(distanceCharge)+"</b></div><div class='rowline'><span>Extra weight charge</span><b>"+money(extraWeightCharge)+"</b></div><div class='rowline'><b>Total delivery charge</b><b class='total'>"+money(total)+"</b></div><p class='muted'>Distance aur fare route estimate ke hisaab se calculate kiya gaya hai.</p>";
   addButton.style.display="block";
  }catch(error){
   result.textContent=error.message||"Distance calculate nahi ho paayi. Pickup aur delivery address dobara check karein.";
@@ -694,7 +704,7 @@ function addParcelToCart(){
  if(!requireCurrentLocation("parcelPickupAddress","parcelPickupStatus","pickup")||!requireCurrentLocation("parcelDropAddress","parcelDropStatus","receiver"))return;
  if(!parcelQuote){toast("Pehle distance aur charge calculate karein.");return;}
  const q=parcelQuote;
- cart.push({id:Date.now(),type:"Send Anything / Parcel",name:q.senderName,phone:q.senderPhone,address:q.pickup,senderName:q.senderName,senderPhone:q.senderPhone,pickup:q.pickup,receiverName:q.receiverName,receiverPhone:q.receiverPhone,drop:q.drop,weight:q.weight,description:q.description,distanceKm:q.distanceKm,distanceCharge:q.distanceCharge,extraWeightCharge:q.extraWeightCharge,total:q.total,location:q.pickupLocation,dropLocation:q.dropLocation});
+ cart.push({id:Date.now(),type:"Send Anything / Parcel",name:q.senderName,phone:q.senderPhone,address:q.pickup,senderName:q.senderName,senderPhone:q.senderPhone,pickup:q.pickup,receiverName:q.receiverName,receiverPhone:q.receiverPhone,drop:q.drop,weight:q.weight,description:q.description,category:q.category,distanceKm:q.distanceKm,distanceCharge:q.distanceCharge,extraWeightCharge:q.extraWeightCharge,total:q.total,location:q.pickupLocation,dropLocation:q.dropLocation});
  saveCart();toast("Parcel cart mein add ho gaya!");openPage("cart");
 }
 
