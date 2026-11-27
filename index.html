@@ -184,6 +184,7 @@ footer{text-align:center;padding:25px 15px;color:var(--muted);font-size:12px}
    <button class="navbtn active" data-page="home" onclick="openPage('home')">Home</button>
    <button class="navbtn" data-page="daily" onclick="openPage('daily')">Daily Tiffin</button>
    <button class="navbtn" data-page="monthly" onclick="openPage('monthly')">Monthly Plans</button>
+   <button class="navbtn" data-page="parcel" onclick="openPage('parcel')">Send Anything</button>
    <button class="navbtn" data-page="track" onclick="openPage('track')">Track Order</button>
   </nav>
   <button class="cart-top" onclick="openPage('cart')">🛒 Cart <span id="cartCount">0</span></button>
@@ -336,6 +337,40 @@ footer{text-align:center;padding:25px 15px;color:var(--muted);font-size:12px}
  </div>
 </section>
 
+<section class="page" id="parcel">
+ <h1>Send Anything / Parcel Delivery 📦</h1>
+ <p class="muted">Ghar se parcel pickup karwao aur kisi bhi address par bhejo.</p>
+ <div class="panel">
+  <h3>1. Sender Details (Pickup)</h3>
+  <div class="form-grid">
+   <div><label>Sender Name</label><input id="parcelSenderName" placeholder="Your full name"></div>
+   <div><label>Sender Mobile</label><input id="parcelSenderPhone" type="tel" maxlength="10" placeholder="10 digit mobile number"></div>
+  </div>
+  <label>Pickup Address</label><textarea id="parcelPickupAddress" placeholder="House number, area, colony, landmark..."></textarea>
+  <button type="button" class="location-btn" onclick="useCurrentLocation('parcelPickupAddress','parcelPickupStatus')">📍 Use My Current Location</button>
+  <p class="location-status" id="parcelPickupStatus" aria-live="polite"></p>
+ </div>
+ <div class="panel">
+  <h3>2. Receiver Details (Delivery)</h3>
+  <div class="form-grid">
+   <div><label>Receiver Name</label><input id="parcelReceiverName" placeholder="Receiver full name"></div>
+   <div><label>Receiver Mobile</label><input id="parcelReceiverPhone" type="tel" maxlength="10" placeholder="10 digit mobile number"></div>
+  </div>
+  <label>Delivery Address</label><textarea id="parcelDropAddress" placeholder="Receiver house number, area, city, landmark..."></textarea>
+ </div>
+ <div class="panel">
+  <h3>3. Parcel Information</h3>
+  <div class="form-grid">
+   <div><label>Parcel Weight (kg)</label><input id="parcelWeight" type="number" min="0.1" step="0.1" placeholder="Example: 2"></div>
+   <div><label>What are you sending?</label><input id="parcelDescription" placeholder="Documents, clothes, gift..."></div>
+  </div>
+  <div class="notice" style="margin-top:12px">Delivery charge: ₹30 per km for parcels up to 5 kg. Above 5 kg, ₹10 extra per additional kg is added.</div>
+  <button class="btn" style="width:100%;margin-top:14px" onclick="calculateParcelFare()">Calculate Distance & Delivery Charge</button>
+  <div id="parcelFareResult" class="summary" style="display:none"></div>
+  <button class="btn green" id="addParcelButton" style="width:100%;margin-top:12px;display:none" onclick="addParcelToCart()">Add Parcel to Cart</button>
+ </div>
+</section>
+
 <section class="page" id="cart">
  <h1>Your Cart 🛒</h1>
  <div id="cartContent"></div>
@@ -368,6 +403,7 @@ footer{text-align:center;padding:25px 15px;color:var(--muted);font-size:12px}
  <button class="active" data-page="home" onclick="openPage('home')"><span>⌂</span>Home</button>
  <button data-page="daily" onclick="openPage('daily')"><span>🍱</span>Daily</button>
  <button data-page="monthly" onclick="openPage('monthly')"><span>📅</span>Monthly</button>
+ <button data-page="parcel" onclick="openPage('parcel')"><span>📦</span>Send</button>
  <button data-page="cart" onclick="openPage('cart')"><span>🛒</span>Cart</button>
  <button data-page="track" onclick="openPage('track')"><span>📦</span>Track</button>
 </div>
@@ -438,6 +474,60 @@ function useCurrentLocation(addressId,statusId){
  },e=>{
   status.textContent=e.code===1?"Permission denied. Allow Location for this site in Chrome settings.":e.code===2?"Location unavailable. Turn on phone GPS and try again.":e.code===3?"Location timed out. Keep GPS on and retry.":"Could not get location. Enter address manually.";
  },{enableHighAccuracy:true,timeout:20000,maximumAge:0});
+}
+
+async function geocodeAddress(address){
+ const url="https://nominatim.openstreetmap.org/search?format=jsonv2&limit=1&q="+encodeURIComponent(address);
+ const response=await fetch(url,{headers:{Accept:"application/json"}});
+ if(!response.ok)throw new Error("Address search unavailable");
+ const results=await response.json();
+ if(!results.length)throw new Error("Address not found. Add area, city and PIN code.");
+ return {lat:Number(results[0].lat),lon:Number(results[0].lon)};
+}
+
+let parcelQuote=null;
+async function calculateParcelFare(){
+ const senderName=document.getElementById("parcelSenderName").value.trim();
+ const senderPhone=getPhone("parcelSenderPhone");
+ const pickup=document.getElementById("parcelPickupAddress").value.trim();
+ const receiverName=document.getElementById("parcelReceiverName").value.trim();
+ const receiverPhone=getPhone("parcelReceiverPhone");
+ const drop=document.getElementById("parcelDropAddress").value.trim();
+ const weight=Number(document.getElementById("parcelWeight").value);
+ const description=document.getElementById("parcelDescription").value.trim();
+ const result=document.getElementById("parcelFareResult");
+ const addButton=document.getElementById("addParcelButton");
+ parcelQuote=null; addButton.style.display="none"; result.style.display="block";
+ if(!validDetails(senderName,senderPhone,pickup)||!validDetails(receiverName,receiverPhone,drop))return;
+ if(!Number.isFinite(weight)||weight<=0){toast("Parcel ka sahi weight enter karein.");return;}
+ if(!description){toast("Parcel mein kya bhej rahe hain, woh likhein.");return;}
+ result.textContent="Pickup aur delivery distance check ho rahi hai...";
+ try{
+  const from=tifoLocations.parcelPickupAddress||await geocodeAddress(pickup);
+  const to=await geocodeAddress(drop);
+  const routeUrl="https://router.project-osrm.org/route/v1/driving/"+from.lon+","+from.lat+";"+to.lon+","+to.lat+"?overview=false";
+  const routeResponse=await fetch(routeUrl);
+  if(!routeResponse.ok)throw new Error("Route service unavailable");
+  const routeData=await routeResponse.json();
+  if(routeData.code!=="Ok"||!routeData.routes||!routeData.routes.length)throw new Error("Driving route not found");
+  const distanceKm=routeData.routes[0].distance/1000;
+  const extraWeight=Math.max(0,weight-5);
+  const distanceCharge=Math.ceil(distanceKm*30);
+  const extraWeightCharge=Math.ceil(extraWeight*10);
+  const total=distanceCharge+extraWeightCharge;
+  parcelQuote={senderName,senderPhone,pickup,receiverName,receiverPhone,drop,weight,description,distanceKm,distanceCharge,extraWeightCharge,total,pickupLocation:from,dropLocation:to};
+  result.innerHTML="<div class='rowline'><span>Driving distance</span><b>"+distanceKm.toFixed(1)+" km</b></div><div class='rowline'><span>Distance charge (₹30/km)</span><b>"+money(distanceCharge)+"</b></div><div class='rowline'><span>Extra weight charge</span><b>"+money(extraWeightCharge)+"</b></div><div class='rowline'><b>Total delivery charge</b><b class='total'>"+money(total)+"</b></div><p class='muted'>Distance aur fare route estimate ke hisaab se calculate kiya gaya hai.</p>";
+  addButton.style.display="block";
+ }catch(error){
+  result.textContent=error.message||"Distance calculate nahi ho paayi. Pickup aur delivery address dobara check karein.";
+ }
+}
+
+function addParcelToCart(){
+ if(!parcelQuote){toast("Pehle distance aur charge calculate karein.");return;}
+ const q=parcelQuote;
+ cart.push({id:Date.now(),type:"Send Anything / Parcel",name:q.senderName,phone:q.senderPhone,address:q.pickup,senderName:q.senderName,senderPhone:q.senderPhone,pickup:q.pickup,receiverName:q.receiverName,receiverPhone:q.receiverPhone,drop:q.drop,weight:q.weight,description:q.description,distanceKm:q.distanceKm,distanceCharge:q.distanceCharge,extraWeightCharge:q.extraWeightCharge,total:q.total,location:q.pickupLocation,dropLocation:q.dropLocation});
+ saveCart();toast("Parcel cart mein add ho gaya!");openPage("cart");
 }
 
 function getPhone(id){
@@ -541,6 +631,8 @@ function renderCart(){
   total+=Number(item.total);
   let details=item.type==="Daily Tiffin"
    ?`<p class="muted">Sabzi: ${item.sabzis.map(escapeHTML).join(", ")}<br>Roti: ${escapeHTML(item.roti)}<br>Butter roti: ${item.butterQty} | Water: ${item.waterQty} | Meal: ${escapeHTML(item.meal)}</p>`
+   :item.type==="Send Anything / Parcel"
+   ?`<p class="muted">From: ${escapeHTML(item.senderName)} (${escapeHTML(item.senderPhone)})<br>Pickup: ${escapeHTML(item.pickup)}<br>To: ${escapeHTML(item.receiverName)} (${escapeHTML(item.receiverPhone)})<br>Delivery: ${escapeHTML(item.drop)}<br>Parcel: ${escapeHTML(item.description)} | Weight: ${escapeHTML(item.weight)} kg<br>Distance: ${Number(item.distanceKm).toFixed(1)} km</p>`
    :`<p class="muted">Start Date: ${escapeHTML(item.start)} | Meal: ${escapeHTML(item.meal)}</p>`;
   html+=`<div class="cart-item">
    <div style="display:flex;justify-content:space-between;align-items:center;gap:10px">
