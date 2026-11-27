@@ -850,6 +850,7 @@ function renderCart(){
 
 function proceedToPayment(){
  if(!cart.length){toast("Cart khali hai.");return;}
+ paymentProofData=null;
  const total=cart.reduce((s,i)=>s+Number(i.total),0);
  const first=cart[0];
  const orderId="TIFO"+String(Date.now()).slice(-6);
