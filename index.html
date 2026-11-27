@@ -288,10 +288,10 @@ footer{text-align:center;padding:25px 15px;color:var(--muted);font-size:12px}
  <div class="panel">
   <h3>1. Apni 2 Sabzi Choose Karein</h3>
   <div class="food-grid sabzi-grid" style="margin-top:14px">
-   <label class="card food-select"><img src="./images%20(3).jpeg" alt="Aloo Matar" loading="lazy"><div class="card-body"><h3>Aloo Matar</h3><div class="select-line"><span>Choose this sabzi</span><input type="checkbox" name="sabzi" value="Aloo Matar" onchange="updateDailyTotal()"></div></div></label>
-   <label class="card food-select"><img src="./images.jpeg" alt="Matar Paneer" loading="lazy"><div class="card-body"><h3>Matar Paneer</h3><div class="select-line"><span>Choose this sabzi</span><input type="checkbox" name="sabzi" value="Matar Paneer" onchange="updateDailyTotal()"></div></div></label>
-   <label class="card food-select"><img src="./images%20(2).jpeg" alt="Dal Tadka" loading="lazy"><div class="card-body"><h3>Dal Tadka</h3><div class="select-line"><span>Choose this sabzi</span><input type="checkbox" name="sabzi" value="Dal Tadka" onchange="updateDailyTotal()"></div></div></label>
-   <label class="card food-select"><img src="./images%20(1).jpeg" alt="Mix Veg" loading="lazy"><div class="card-body"><h3>Mix Veg</h3><div class="select-line"><span>Choose this sabzi</span><input type="checkbox" name="sabzi" value="Mix Veg" onchange="updateDailyTotal()"></div></div></label>
+   <label class="card food-select"><img src="./images%20(3).jpeg" alt="Aloo Matar" loading="lazy"><div class="card-body"><h3>Aloo Matar</h3><div class="select-line"><span>Choose this sabzi</span><input type="checkbox" name="sabzi" value="Aloo Matar" onchange="handleSabziSelection(this)"></div></div></label>
+   <label class="card food-select"><img src="./images.jpeg" alt="Matar Paneer" loading="lazy"><div class="card-body"><h3>Matar Paneer</h3><div class="select-line"><span>Choose this sabzi</span><input type="checkbox" name="sabzi" value="Matar Paneer" onchange="handleSabziSelection(this)"></div></div></label>
+   <label class="card food-select"><img src="./images%20(2).jpeg" alt="Dal Tadka" loading="lazy"><div class="card-body"><h3>Dal Tadka</h3><div class="select-line"><span>Choose this sabzi</span><input type="checkbox" name="sabzi" value="Dal Tadka" onchange="handleSabziSelection(this)"></div></div></label>
+   <label class="card food-select"><img src="./images%20(1).jpeg" alt="Mix Veg" loading="lazy"><div class="card-body"><h3>Mix Veg</h3><div class="select-line"><span>Choose this sabzi</span><input type="checkbox" name="sabzi" value="Mix Veg" onchange="handleSabziSelection(this)"></div></div></label>
   </div>
   <h3 style="margin-top:22px">2. Roti Choose Karein</h3>
   <label class="choice"><input type="radio" name="roti" value="Sada Ghar Ki Roti (4 pieces)" checked onchange="updateDailyTotal()"><span>Sada Ghar Ki Roti – 4 pieces</span></label>
@@ -485,25 +485,28 @@ function requireCurrentLocation(addressId,statusId,label){
 
 function useCurrentLocation(addressId,statusId){
  const status=document.getElementById(statusId), address=document.getElementById(addressId);
- if(!navigator.geolocation){status.textContent="Location is not supported by this browser.";return;}
- status.textContent="Finding your current location... Please keep GPS on.";
+ if(!navigator.geolocation){if(status)status.textContent="Is browser mein GPS location support nahi hai.";toast("GPS location support nahi hai.");return;}
+ if(!window.isSecureContext){if(status)status.textContent="Location ke liye secure HTTPS website zaroori hai.";toast("TIFO ko HTTPS link se kholein.");return;}
+ if(status)status.textContent="Phone ki location permission maangi ja rahi hai...";
  navigator.geolocation.getCurrentPosition(async p=>{
   const lat=p.coords.latitude, lon=p.coords.longitude;
   tifoLocations[addressId]={lat,lon};
   address.dataset.locationAllowed="true";
   address.value="Current Location ("+lat.toFixed(6)+", "+lon.toFixed(6)+") — Add house/flat number and landmark.";
-  status.textContent="GPS location found. Looking up your address...";
+  if(status)status.textContent="GPS location mil gayi. Address load ho raha hai...";
   try{
    const response=await fetch("https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat="+encodeURIComponent(lat)+"&lon="+encodeURIComponent(lon));
    if(!response.ok)throw new Error("Address lookup failed");
    const data=await response.json();
-   if(data.display_name){address.value=data.display_name;status.textContent="Address filled. Please add/check house number and landmark.";}
-  }catch(e){status.textContent="GPS found; street address lookup unavailable. Please add house number and landmark.";}
+   if(data.display_name){address.value=data.display_name;if(status)status.textContent="Location verified. Ghar/flat number aur landmark check kar lein.";}
+  }catch(e){if(status)status.textContent="GPS location mil gayi. Ghar/flat number aur landmark address mein add karein.";}
  },e=>{
   delete tifoLocations[addressId];
   address.dataset.locationAllowed="false";
-  status.textContent=e.code===1?"Chrome ne TIFO ki location permission block ki hai. Chrome mein site icon → Permissions → Location → Allow karein. Phone Settings → Apps → Chrome → Permissions → Location bhi Allow karein, phir page reload karein.":e.code===2?"Phone ka GPS/Location ON karein aur khuli jagah par dobara try karein.":e.code===3?"GPS ko location milne mein der hui. Location ON rakhein aur dobara try karein.":"Location nahi mil saki. Permission aur GPS settings check karein.";
- },{enableHighAccuracy:true,timeout:20000,maximumAge:0});
+  const msg=e.code===1?"Location permission block hai. Phone/Chrome mein TIFO site ki Location permission Allow karein. Phir isi button ko dobara dabayein.":e.code===2?"Phone ki Location/GPS ON karein aur dobara try karein.":e.code===3?"GPS ko time out hua. Location ON karke dobara button dabayein.":"Current location nahi mil saki. GPS aur permission check karein.";
+  if(status)status.textContent=msg;
+  toast(msg);
+ },{enableHighAccuracy:true,timeout:30000,maximumAge:0});
 }
 
 async function geocodeAddress(address){
@@ -516,7 +519,7 @@ async function geocodeAddress(address){
 }
 
 let parcelQuote=null;
-async async function calculateParcelFare(){
+async function calculateParcelFare(){
  const senderName=document.getElementById("parcelSenderName").value.trim();
  const senderPhone=getPhone("parcelSenderPhone");
  const pickup=document.getElementById("parcelPickupAddress").value.trim();
@@ -576,6 +579,15 @@ function validDetails(name,phone,address){
 
 function selectedSabzis(){
  return [...document.querySelectorAll('input[name="sabzi"]:checked')].map(x=>x.value);
+}
+
+function handleSabziSelection(changed){
+ const chosen=selectedSabzis();
+ if(chosen.length>2){
+  changed.checked=false;
+  toast("Sirf 2 sabzi select kar sakte hain. Teesri sabzi select nahi hogi.");
+ }
+ updateDailyTotal();
 }
 
 function updateDailyTotal(){
