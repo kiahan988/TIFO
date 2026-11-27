@@ -648,8 +648,28 @@ async function searchParcelMap(){
    }catch(e){}
   }
   if(!Number.isFinite(lat)||!Number.isFinite(lon)){
-   status.textContent="Is address ka map result nahi mila. Address ke saath area/city likhein, ya map par manually exact jagah tap karke pin set karein.";
-   toast("Search result nahi mila. Map par pin manually bhi laga sakte hain.");return;
+   // Keep the map useful even when a street-level geocoder cannot match the address.
+   if(pin==="206245"||/jaswant\\s*nagar|jaswantnagar|ramleela\\s*road/i.test(raw)){
+    lat=26.9298;lon=78.9027;
+    label="Jaswantnagar, Etawah, Uttar Pradesh 206245 (approximate area)";
+   }else if(pin){
+    for(const q of [pin+", India","PIN "+pin+", India"]){
+     try{
+      const u="https://photon.komoot.io/api/?q="+encodeURIComponent(q)+"&limit=5&lang=en";
+      const rr=await fetch(u,{headers:{Accept:"application/json"}});
+      if(!rr.ok)continue;
+      const dd=await rr.json();
+      const ff=(dd.features||[]).find(x=>x.geometry&&x.geometry.coordinates);
+      if(ff){lon=Number(ff.geometry.coordinates[0]);lat=Number(ff.geometry.coordinates[1]);label="PIN "+pin+" area (approximate)";break;}
+     }catch(e){}
+    }
+   }
+  }
+  if(!Number.isFinite(lat)||!Number.isFinite(lon)){
+   status.textContent="Exact address result nahi mila, lekin map khula hai. Map ko receiver ke area tak le jaakar ghar par tap karein aur pin confirm karein.";
+   parcelMapInstance.invalidateSize();
+   toast("Map par receiver ki exact jagah tap karke pin set karein.");
+   return;
   }
   parcelMapInstance.setView([lat,lon],pin?16:17);
   setParcelMapPin(lat,lon);
