@@ -115,6 +115,15 @@ main{max-width:1100px;margin:auto;padding:20px 17px}
 .card h3{font-size:16px;margin:4px 0}
 .price{font-weight:900;color:var(--red)}
 .food-grid{grid-template-columns:repeat(4,1fr)}
+.food-select{display:block;text-align:left;cursor:pointer;margin:0;border:2px solid var(--border)}
+.food-select:has(input:checked){border-color:var(--red);background:#fff7f2}
+.food-select .card-body{padding:11px}
+.food-select h3{margin:0 0 9px}
+.select-line{display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:12px;color:var(--muted);font-weight:800}
+.select-line input{width:20px;height:20px;accent-color:var(--red);margin:0}
+.location-btn{margin:9px 0 5px;background:#fff3ec;color:var(--red);border:1px solid #f2c8b8;border-radius:10px;padding:11px 14px;font-weight:900;width:100%;cursor:pointer}
+.location-status{font-size:12px;color:var(--muted);margin:3px 0 10px;min-height:18px}
+@media(max-width:600px){.food-grid.sabzi-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.food-select img{height:125px}}
 .section-head{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
 .panel{margin-top:15px}
 .panel h2,.panel h3{margin-top:0}
@@ -260,17 +269,11 @@ footer{text-align:center;padding:25px 15px;color:var(--muted);font-size:12px}
 
  <div class="panel">
   <h3>1. Apni 2 Sabzi Choose Karein</h3>
-  <div class="choice-grid">
-   <label class="choice"><input type="checkbox" name="sabzi" value="Aloo Matar" onchange="updateDailyTotal()"><span>Aloo Matar</span></label>
-   <label class="choice"><input type="checkbox" name="sabzi" value="Matar Paneer" onchange="updateDailyTotal()"><span>Matar Paneer</span></label>
-   <label class="choice"><input type="checkbox" name="sabzi" value="Dal Tadka" onchange="updateDailyTotal()"><span>Dal Tadka</span></label>
-   <label class="choice"><input type="checkbox" name="sabzi" value="Mix Veg" onchange="updateDailyTotal()"><span>Mix Veg</span></label>
-  </div>
-  <div class="food-grid" style="margin-top:14px">
-   <div class="card"><img src="./images (3).jpeg" alt="Aloo Matar"></div>
-   <div class="card"><img src="./images.jpeg" alt="Matar Paneer"></div>
-   <div class="card"><img src="./images (2).jpeg" alt="Dal Tadka"></div>
-   <div class="card"><img src="./images (1).jpeg" alt="Mix Veg"></div>
+  <div class="food-grid sabzi-grid" style="margin-top:14px">
+   <label class="card food-select"><img src="./images%20(3).jpeg" alt="Aloo Matar" loading="lazy"><div class="card-body"><h3>Aloo Matar</h3><div class="select-line"><span>Choose this sabzi</span><input type="checkbox" name="sabzi" value="Aloo Matar" onchange="updateDailyTotal()"></div></div></label>
+   <label class="card food-select"><img src="./images.jpeg" alt="Matar Paneer" loading="lazy"><div class="card-body"><h3>Matar Paneer</h3><div class="select-line"><span>Choose this sabzi</span><input type="checkbox" name="sabzi" value="Matar Paneer" onchange="updateDailyTotal()"></div></div></label>
+   <label class="card food-select"><img src="./images%20(2).jpeg" alt="Dal Tadka" loading="lazy"><div class="card-body"><h3>Dal Tadka</h3><div class="select-line"><span>Choose this sabzi</span><input type="checkbox" name="sabzi" value="Dal Tadka" onchange="updateDailyTotal()"></div></div></label>
+   <label class="card food-select"><img src="./images%20(1).jpeg" alt="Mix Veg" loading="lazy"><div class="card-body"><h3>Mix Veg</h3><div class="select-line"><span>Choose this sabzi</span><input type="checkbox" name="sabzi" value="Mix Veg" onchange="updateDailyTotal()"></div></div></label>
   </div>
   <h3 style="margin-top:22px">2. Roti Choose Karein</h3>
   <label class="choice"><input type="radio" name="roti" value="Sada Ghar Ki Roti (4 pieces)" checked onchange="updateDailyTotal()"><span>Sada Ghar Ki Roti – 4 pieces</span></label>
@@ -295,6 +298,8 @@ footer{text-align:center;padding:25px 15px;color:var(--muted);font-size:12px}
    <div><label>Mobile Number</label><input id="dailyPhone" type="tel" maxlength="10" placeholder="10 digit mobile number"></div>
   </div>
   <label>Delivery Address</label><textarea id="dailyAddress" placeholder="House number, area, landmark..."></textarea>
+  <button type="button" class="location-btn" onclick="useCurrentLocation('dailyAddress','dailyLocationStatus')">📍 Use My Current Location</button>
+  <p class="location-status" id="dailyLocationStatus" aria-live="polite"></p>
   <label>Meal Timing</label>
   <select id="dailyMeal"><option value="Lunch">Lunch</option><option value="Dinner">Dinner</option></select>
   <p class="muted">Rice, boondi raita, salad aur pickle tiffin mein included hain.</p>
@@ -320,6 +325,8 @@ footer{text-align:center;padding:25px 15px;color:var(--muted);font-size:12px}
    <div><label>Mobile Number</label><input id="monthlyPhone" type="tel" maxlength="10" placeholder="10 digit mobile number"></div>
   </div>
   <label>Full Delivery Address</label><textarea id="monthlyAddress" placeholder="House number, area, landmark..."></textarea>
+  <button type="button" class="location-btn" onclick="useCurrentLocation('monthlyAddress','monthlyLocationStatus')">📍 Use My Current Location</button>
+  <p class="location-status" id="monthlyLocationStatus" aria-live="polite"></p>
   <div class="form-grid">
    <div><label>Plan Start Date</label><input id="monthlyStart" type="date"></div>
    <div><label>Meal Timing</label><select id="monthlyMeal"><option>Lunch</option><option>Dinner</option><option>All Meals</option></select></div>
@@ -377,6 +384,7 @@ let butterQty = 0;
 let waterQty = 0;
 let selectedPlan = "Classic";
 let activeOrderId = null;
+const tifoLocations = {};
 
 function toast(message){
  const el=document.getElementById("toast");
@@ -410,6 +418,26 @@ function saveOrders(){
 
 function updateCartCount(){
  document.getElementById("cartCount").textContent=cart.length;
+}
+
+function useCurrentLocation(addressId,statusId){
+ const status=document.getElementById(statusId), address=document.getElementById(addressId);
+ if(!navigator.geolocation){status.textContent="Location is not supported by this browser.";return;}
+ status.textContent="Finding your current location... Please keep GPS on.";
+ navigator.geolocation.getCurrentPosition(async p=>{
+  const lat=p.coords.latitude, lon=p.coords.longitude;
+  tifoLocations[addressId]={lat,lon};
+  address.value="Current Location ("+lat.toFixed(6)+", "+lon.toFixed(6)+") — Add house/flat number and landmark.";
+  status.textContent="GPS location found. Looking up your address...";
+  try{
+   const response=await fetch("https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat="+encodeURIComponent(lat)+"&lon="+encodeURIComponent(lon));
+   if(!response.ok)throw new Error("Address lookup failed");
+   const data=await response.json();
+   if(data.display_name){address.value=data.display_name;status.textContent="Address filled. Please add/check house number and landmark.";}
+  }catch(e){status.textContent="GPS found; street address lookup unavailable. Please add house number and landmark.";}
+ },e=>{
+  status.textContent=e.code===1?"Permission denied. Allow Location for this site in Chrome settings.":e.code===2?"Location unavailable. Turn on phone GPS and try again.":e.code===3?"Location timed out. Keep GPS on and retry.":"Could not get location. Enter address manually.";
+ },{enableHighAccuracy:true,timeout:20000,maximumAge:0});
 }
 
 function getPhone(id){
@@ -455,7 +483,7 @@ function addDailyToCart(){
  const total=150+(butterQty*15)+(waterQty*20);
  cart.push({
   id:Date.now(),type:"Daily Tiffin",name,phone,address,meal,
-  sabzis,roti,butterQty,waterQty,total
+  sabzis,roti,butterQty,waterQty,total,location:tifoLocations.dailyAddress||null
  });
  saveCart();
  toast("Daily Tiffin cart mein add ho gaya!");
@@ -481,7 +509,7 @@ function addMonthlyToCart(){
  const total=selectedPlan==="Classic"?12000:13800;
  cart.push({
   id:Date.now(),type:"Monthly "+selectedPlan+" Plan",name,phone,address,
-  start,meal,total,plan:selectedPlan
+  start,meal,total,plan:selectedPlan,location:tifoLocations.monthlyAddress||null
  });
  saveCart();
  toast("Monthly plan cart mein add ho gaya!");
