@@ -243,7 +243,7 @@ footer{text-align:center;padding:25px 15px;color:var(--muted);font-size:12px}
   <div class="map-picker-search"><input id="parcelMapSearch" placeholder="Search area, landmark, city or PIN code"><button type="button" class="btn" onclick="searchParcelMap()">Search</button></div>
   <div id="parcelMap"></div>
   <p class="map-picker-hint">Map par receiver ke ghar ko tap karein ya pin ko kheenchkar exact jagah par rakhein.</p>
-  <div class="map-picker-actions"><button type="button" class="btn secondary" onclick="useMapCurrentLocation()">Use My Current Location</button><button type="button" class="btn green" onclick="confirmParcelMapLocation()">Confirm This Location</button></div>
+  <div class="map-picker-actions"><button type="button" class="btn green" onclick="confirmParcelMapLocation()">Confirm Receiver Pin Location</button></div>
  </div>
 </div>
 <main>
@@ -413,7 +413,6 @@ footer{text-align:center;padding:25px 15px;color:var(--muted);font-size:12px}
   </div>
   <label>Pickup Address</label><textarea id="parcelPickupAddress" placeholder="House number, area, colony, landmark..."></textarea>
   <button type="button" class="location-btn" onclick="useCurrentLocation('parcelPickupAddress','parcelPickupStatus')">📍 Use My Current Location</button>
-  <button type="button" class="location-btn" onclick="openParcelMap('parcelPickupAddress','parcelPickupStatus')">🗺️ Choose Pickup Location on Map</button>
   <p class="location-status" id="parcelPickupStatus" aria-live="polite"></p>
  </div>
  <div class="panel">
@@ -423,7 +422,6 @@ footer{text-align:center;padding:25px 15px;color:var(--muted);font-size:12px}
    <div><label>Receiver Mobile</label><input id="parcelReceiverPhone" type="tel" maxlength="10" placeholder="10 digit mobile number"></div>
   </div>
   <label>Delivery Address</label><textarea id="parcelDropAddress" placeholder="Receiver house number, area, city, landmark..."></textarea>
-  <button type="button" class="location-btn" onclick="useCurrentLocation('parcelDropAddress','parcelDropStatus')">📍 Use Receiver Current Location</button>
   <button type="button" class="location-btn" onclick="openParcelMap('parcelDropAddress','parcelDropStatus')">🗺️ Choose Receiver Location on Map</button>
   <p class="location-status" id="parcelDropStatus" aria-live="polite"></p>
  </div>
@@ -434,6 +432,9 @@ footer{text-align:center;padding:25px 15px;color:var(--muted);font-size:12px}
    <div><label>Parcel Weight (kg)</label><input id="parcelWeight" type="number" min="0.1" step="0.1" placeholder="Example: 2"></div>
   </div>
   <label>Item details</label><input id="parcelDescription" placeholder="Documents, clothes, gift, lunch box...">
+  <label style="margin-top:12px">Parcel ki Photo Upload Karein (Required)</label>
+  <input id="parcelPhoto" type="file" accept="image/*" capture="environment" onchange="previewParcelPhoto(this)" style="width:100%;padding:10px;border:1px solid var(--border);border-radius:10px;background:#fff">
+  <div id="parcelPhotoPreview" style="display:none;margin-top:10px"></div>
   <div class="notice" style="margin-top:12px">Lunch Box / Documents (3 kg tak): pehle 2 km ₹20, uske baad ₹15 per km. Baaki parcels: pehle 2 km fixed ₹30; uske baad ₹20 per extra km. 5 kg se zyada par ₹10 per extra kg.</div>
   <button class="btn" style="width:100%;margin-top:14px" onclick="calculateParcelFare()">Calculate Distance & Delivery Charge</button>
   <div id="parcelFareResult" class="summary" style="display:none"></div>
@@ -652,6 +653,11 @@ async function geocodeAddress(address){
 }
 
 let parcelQuote=null;
+let parcelPhotoData=null;
+let paymentProofData=null;
+function readCompressedImage(file,maxSize=1100,quality=0.72){return new Promise((resolve,reject)=>{if(!file||!file.type.startsWith("image/")){reject(new Error("Image file select karein."));return;}const reader=new FileReader();reader.onerror=()=>reject(new Error("Image read nahi hui."));reader.onload=()=>{const img=new Image();img.onerror=()=>reject(new Error("Image open nahi hui."));img.onload=()=>{const scale=Math.min(1,maxSize/Math.max(img.width,img.height));const c=document.createElement("canvas");c.width=Math.round(img.width*scale);c.height=Math.round(img.height*scale);c.getContext("2d").drawImage(img,0,0,c.width,c.height);resolve(c.toDataURL("image/jpeg",quality));};img.src=reader.result;};reader.readAsDataURL(file);});}
+async function previewParcelPhoto(input){const box=document.getElementById("parcelPhotoPreview");parcelPhotoData=null;box.style.display="none";if(!input.files||!input.files[0])return;try{parcelPhotoData=await readCompressedImage(input.files[0]);box.innerHTML='<img src="'+parcelPhotoData+'" style="max-width:180px;max-height:180px;object-fit:cover;border-radius:12px"><p class="muted">Parcel photo attach ho gayi.</p>';box.style.display="block";}catch(e){input.value="";toast(e.message);}}
+async function handlePaymentProof(input){paymentProofData=null;const status=document.getElementById("paymentProofStatus"),options=document.getElementById("afterPaymentOptions");options.style.display="none";if(!input.files||!input.files[0])return;try{paymentProofData=await readCompressedImage(input.files[0],1400,0.78);status.textContent="Payment screenshot upload ho gaya. Ab neeche ke options khul gaye hain.";options.style.display="grid";}catch(e){input.value="";status.textContent=e.message;}}
 async function calculateParcelFare(){
  const senderName=document.getElementById("parcelSenderName").value.trim();
  const senderPhone=getPhone("parcelSenderPhone");
@@ -669,6 +675,7 @@ async function calculateParcelFare(){
  if(!requireCurrentLocation("parcelDropAddress","parcelDropStatus","receiver"))return;
  if(!Number.isFinite(weight)||weight<=0){toast("Parcel ka sahi weight enter karein.");return;}
  if(!description){toast("Parcel mein kya bhej rahe hain, woh likhein.");return;}
+ if(!parcelPhotoData){toast("Parcel ki photo upload karna zaroori hai.");return;}
  result.textContent="Pickup aur delivery distance check ho rahi hai...";
  try{
   const from=tifoLocations.parcelPickupAddress||await geocodeAddress(pickup);
@@ -704,7 +711,8 @@ function addParcelToCart(){
  if(!requireCurrentLocation("parcelPickupAddress","parcelPickupStatus","pickup")||!requireCurrentLocation("parcelDropAddress","parcelDropStatus","receiver"))return;
  if(!parcelQuote){toast("Pehle distance aur charge calculate karein.");return;}
  const q=parcelQuote;
- cart.push({id:Date.now(),type:"Send Anything / Parcel",name:q.senderName,phone:q.senderPhone,address:q.pickup,senderName:q.senderName,senderPhone:q.senderPhone,pickup:q.pickup,receiverName:q.receiverName,receiverPhone:q.receiverPhone,drop:q.drop,weight:q.weight,description:q.description,category:q.category,distanceKm:q.distanceKm,distanceCharge:q.distanceCharge,extraWeightCharge:q.extraWeightCharge,total:q.total,location:q.pickupLocation,dropLocation:q.dropLocation});
+ if(!parcelPhotoData){toast("Parcel ki photo upload karein.");return;}
+ cart.push({id:Date.now(),type:"Send Anything / Parcel",name:q.senderName,phone:q.senderPhone,address:q.pickup,senderName:q.senderName,senderPhone:q.senderPhone,pickup:q.pickup,receiverName:q.receiverName,receiverPhone:q.receiverPhone,drop:q.drop,weight:q.weight,description:q.description,category:q.category,parcelPhoto:parcelPhotoData,distanceKm:q.distanceKm,distanceCharge:q.distanceCharge,extraWeightCharge:q.extraWeightCharge,total:q.total,location:q.pickupLocation,dropLocation:q.dropLocation});
  saveCart();toast("Parcel cart mein add ho gaya!");openPage("cart");
 }
 
@@ -863,37 +871,57 @@ function proceedToPayment(){
 
 function renderPayment(){
  const box=document.getElementById("paymentContent");
- const order=orders.find(o=>o.orderId===activeOrderId) || orders[0];
- if(!order){
-  box.innerHTML='<div class="panel"><p class="muted">Koi active order nahi mila.</p><button class="btn" onclick="openPage(\'daily\')">Order Now</button></div>';
-  return;
- }
+ const order=orders.find(o=>o.orderId===activeOrderId)||orders[0];
+ if(!order){box.innerHTML='<div class="panel"><p class="muted">Koi active order nahi mila.</p></div>';return;}
  const upiLink=`upi://pay?pa=${encodeURIComponent(UPI_ID)}&pn=${encodeURIComponent("TIFO Ghar Jaisa Khana")}&am=${order.total}&cu=INR&tn=${encodeURIComponent(order.orderId)}`;
- const waText=encodeURIComponent(`Namaste TIFO, maine Order ID ${order.orderId} ke liye ${money(order.total)} ka payment kiya hai.\nNaam: ${order.name}\nPhone: ${order.phone}\nAddress: ${order.address}`);
  box.innerHTML=`<div class="panel">
   <div class="rowline"><span>Order ID</span><b>${escapeHTML(order.orderId)}</b></div>
   <div class="rowline"><span>Customer</span><b>${escapeHTML(order.name)} (${escapeHTML(order.phone)})</b></div>
   <div class="rowline"><span>Amount to Pay</span><b class="total">${money(order.total)}</b></div>
-  <div class="payment-box">
-   <span class="muted">UPI ID se pay karein:</span>
-   <strong>${escapeHTML(UPI_ID)}</strong>
-   <a class="btn" href="${upiLink}" style="display:inline-block;text-decoration:none;margin-top:8px">Pay via UPI App</a>
-  </div>
-  <div class="notice">Payment karne ke baad WhatsApp par screenshot ya confirmation bhejein taaki order jaldi confirm ho sake.</div>
-  <div style="display:grid;gap:10px;margin-top:14px">
-   <a class="btn green" href="https://wa.me/${WHATSAPP_NUMBER}?text=${waText}" target="_blank" rel="noopener" style="text-align:center;text-decoration:none" onclick="confirmOrderPlaced('${escapeHTML(order.orderId)}')">Send Payment Proof on WhatsApp</a>
-   <button class="btn dark" onclick="confirmOrderPlaced('${escapeHTML(order.orderId)}')">I Have Paid – Save Order</button>
+  <div class="payment-box"><span class="muted">UPI ID se pay karein:</span><strong>${escapeHTML(UPI_ID)}</strong><a class="btn" href="${upiLink}" style="display:inline-block;text-decoration:none;margin-top:8px">Pay via UPI App</a></div>
+  <div class="notice">Pehle UPI app se payment karein. Payment ke baad transaction screenshot upload karein. Screenshot upload hone ke baad hi neeche ke dono options khulenge.</div>
+  <label style="display:block;margin-top:14px">Payment Screenshot Upload Karein</label>
+  <input id="paymentProofFile" type="file" accept="image/*" onchange="handlePaymentProof(this)" style="width:100%;padding:10px;border:1px solid var(--border);border-radius:10px;background:#fff">
+  <p id="paymentProofStatus" class="muted">Screenshot upload karne tak dono options locked rahenge.</p>
+  <div id="afterPaymentOptions" style="display:none;gap:10px;margin-top:14px">
+   <button class="btn green" style="width:100%" onclick="sendOrderToWhatsApp('${escapeHTML(order.orderId)}')">Send Full Order Details on WhatsApp</button>
+   <button class="btn dark" style="width:100%" onclick="confirmOrderPlaced('${escapeHTML(order.orderId)}')">Confirm Order & Track</button>
   </div>
  </div>`;
 }
-
+function orderWhatsAppText(order){
+ const lines=["NEW TIFO ORDER: "+order.orderId,"Customer: "+order.name+" | Mobile: "+order.phone,"Customer/Pickup address: "+order.address,"Total: "+money(order.total),"Payment proof attached; please verify manually."];
+ (order.items||[]).forEach((item,n)=>{
+  lines.push("ITEM "+(n+1)+": "+item.type+" | "+money(item.total));
+  if(item.type==="Send Anything / Parcel"){
+   lines.push("Sender: "+item.senderName+" ("+item.senderPhone+")","Pickup address: "+item.pickup,"Customer pickup map: "+(item.location?"https://www.google.com/maps?q="+item.location.lat+","+item.location.lon:"Not available"),"Receiver: "+item.receiverName+" ("+item.receiverPhone+")","Receiver address: "+item.drop,"Receiver map pin: "+(item.dropLocation?"https://www.google.com/maps?q="+item.dropLocation.lat+","+item.dropLocation.lon:"Not available"),"Parcel: "+item.description+" | Weight: "+item.weight+" kg");
+  }else{
+   lines.push("Delivery address: "+item.address);
+   if(item.location)lines.push("Customer map: https://www.google.com/maps?q="+item.location.lat+","+item.location.lon);
+   if(item.sabzis)lines.push("Sabzi: "+item.sabzis.join(", ")+" | Roti: "+item.roti);
+  }
+ });
+ return lines.join("\n");
+}
+async function sendOrderToWhatsApp(orderId){
+ const ord=orders.find(o=>o.orderId===orderId);
+ if(!ord||!paymentProofData){toast("Payment screenshot upload karein.");return;}
+ ord.paymentProof=paymentProofData;ord.status="Payment Proof Submitted – Verification Pending";saveOrders();
+ const files=[];
+ try{
+  const proofBlob=await(await fetch(paymentProofData)).blob();files.push(new File([proofBlob],"tifo-payment-proof.jpg",{type:"image/jpeg"}));
+  (ord.items||[]).forEach(async()=>{});
+  for(const item of (ord.items||[])){if(item.parcelPhoto){const b=await(await fetch(item.parcelPhoto)).blob();files.push(new File([b],"tifo-parcel-photo.jpg",{type:"image/jpeg"}));}}
+  if(navigator.share&&navigator.canShare&&navigator.canShare({files})){await navigator.share({title:"TIFO Order "+orderId,text:orderWhatsAppText(ord),files});return;}
+ }catch(e){}
+ window.open("https://wa.me/917599041129?text="+encodeURIComponent(orderWhatsAppText(ord)),"_blank");
+ toast("WhatsApp khulne par photos attach karke Send dabayein.");
+}
 function confirmOrderPlaced(orderId){
  const ord=orders.find(o=>o.orderId===orderId);
- if(ord)ord.status="Order Placed (Payment Sent)";
- saveOrders();
- cart=[];
- saveCart();
- toast("Order "+orderId+" save ho gaya! Track section mein check karein.");
+ if(!ord||!paymentProofData){toast("Pehle payment screenshot upload karein.");return;}
+ ord.paymentProof=paymentProofData;ord.status="Payment Proof Submitted – Verification Pending";saveOrders();cart=[];saveCart();
+ toast("Order save ho gaya. Payment verify hone ke baad confirm hoga.");openPage("track");
 }
 
 function trackOrder(){
