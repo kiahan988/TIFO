@@ -584,68 +584,82 @@ async function searchParcelMap(){
  const input=document.getElementById("parcelMapSearch");
  const status=document.getElementById("parcelMapSearchStatus");
  const button=document.getElementById("parcelMapSearchBtn");
- const raw=input.value.trim();
- if(!raw){status.textContent="PIN code, area ya landmark likhein.";toast("Location likhkar Search dabayein.");input.focus();return;}
- if(!parcelMapInstance){status.textContent="Map load ho raha hai. Thodi der baad try karein.";return;}
- button.disabled=true;button.textContent="Searching...";status.textContent="Location search ho rahi hai...";
+ const raw=(input.value||"").trim();
+ if(!raw){status.textContent="Poora address, area, landmark ya 6-digit PIN code likhein.";input.focus();return;}
+ if(!parcelMapInstance){status.textContent="Map abhi load ho raha hai. 2 second baad Search dabayein.";return;}
+ button.disabled=true;button.textContent="Searching...";status.textContent="Aapki location dhoondh rahe hain...";
  try{
   let lat=NaN,lon=NaN,label="";
-  const pinMatch=raw.match(/^\d{6}$/);
-  let searchTerms=[];
-  if(pinMatch){
-   status.textContent="PIN code "+raw+" ki post office details dhoondh rahe hain...";
+  const pinMatch=raw.match(/\\b\\d{6}\\b/);
+  const pin=pinMatch?pinMatch[0]:"";
+  const addressWithoutPin=raw.replace(/\\b\\d{6}\\b/g," ").replace(/[,،]+/g," ").replace(/\\s+/g," ").trim();
+  const terms=[];
+  const addTerm=v=>{v=(v||"").trim();if(v&&!terms.some(x=>x.toLowerCase()===v.toLowerCase()))terms.push(v);};
+  addTerm(raw);
+  if(addressWithoutPin&&addressWithoutPin.toLowerCase()!==raw.toLowerCase())addTerm(addressWithoutPin);
+  if(pin)addTerm(addressWithoutPin?addressWithoutPin+", "+pin+", India":pin+", India");
+  if(!/india/i.test(raw))addTerm(raw+", India");
+  // PIN service is used only to expand the search, not to force the result to one post office.
+  if(pin){
+   status.textContent="PIN "+pin+" aur diye gaye address dono se search kar rahe hain...";
    try{
-    const pr=await fetch("https://api.postalpincode.in/pincode/"+raw,{headers:{Accept:"application/json"}});
+    const pr=await fetch("https://api.postalpincode.in/pincode/"+pin,{headers:{Accept:"application/json"}});
     if(pr.ok){
      const pd=await pr.json();
      const offices=pd&&pd[0]&&pd[0].PostOffice||[];
-     if(offices.length){
-      const office=offices[0];
-      label=[office.Name,office.District,office.State,office.Pincode].filter(Boolean).join(", ");
-      searchTerms.push(label+", India");
-      offices.slice(1,4).forEach(o=>searchTerms.push([o.Name,o.District,o.State,o.Pincode,"India"].filter(Boolean).join(", ")));
-     }
+     offices.slice(0,8).forEach(o=>addTerm([addressWithoutPin,o.Name,o.District,o.State,o.Pincode,"India"].filter(Boolean).join(", ")));
+     if(offices.length&&!addressWithoutPin)addTerm([offices[0].District,offices[0].State,pin,"India"].filter(Boolean).join(", "));
     }
    }catch(e){}
-   searchTerms.push(raw+", India");
-  }else{
-   searchTerms.push(raw+", India");
   }
-  // Try postcode-aware/locality search first, then two independent map search services.
-  for(const term of searchTerms){
+  // Search the user's full address first; don't restrict results to the old Aligarh fallback.
+  for(const term of terms){
    try{
-    const photon=await fetch("https://photon.komoot.io/api/?q="+encodeURIComponent(term)+"&limit=5&lang=en",{headers:{Accept:"application/json"}});
-    if(photon.ok){
-     const data=await photon.json();
-     const feature=(data.features||[]).find(f=>f.geometry&&f.geometry.coordinates&&(!f.properties.country||/india/i.test(f.properties.country)));
-     if(feature){
-      lon=Number(feature.geometry.coordinates[0]);lat=Number(feature.geometry.coordinates[1]);
-      const p=feature.properties||{};
-      label=label||[p.name,p.street,p.city||p.locality,p.state,p.postcode].filter(Boolean).join(", ");
-      break;
-     }
+    const url="https://photon.komoot.io/api/?q="+encodeURIComponent(term)+"&limit=8&lang=en";
+    const response=await fetch(url,{headers:{Accept:"application/json"}});
+    if(!response.ok)continue;
+    const data=await response.json();
+    const features=(data.features||[]).filter(f=>f.geometry&&f.geometry.coordinates);
+    const feature=features.find(f=>{
+     const p=f.properties||{};
+     const country=(p.country||"").toLowerCase();
+     const postcode=String(p.postcode||"");
+     return (!country||country.includes("india"))&&(!pin||!postcode||postcode===pin);
+    })||features.find(f=>f.geometry&&f.geometry.coordinates);
+    if(feature){
+     lon=Number(feature.geometry.coordinates[0]);lat=Number(feature.geometry.coordinates[1]);
+     const p=feature.properties||{};
+     label=[p.name,p.housenumber,p.street,p.district,p.city||p.locality,p.state,p.postcode,p.country].filter(Boolean).join(", ")||term;
+     if(Number.isFinite(lat)&&Number.isFinite(lon))break;
     }
    }catch(e){}
-   if(Number.isFinite(lat)&&Number.isFinite(lon))break;
+  }
+  // One user-triggered fallback request; public Nominatim must not be queried in rapid loops.
+  if(!Number.isFinite(lat)||!Number.isFinite(lon)){
+   await new Promise(resolve=>setTimeout(resolve,1100));
+   const nomUrl="https://nominatim.openstreetmap.org/search?format=jsonv2&limit=5&countrycodes=in&q="+encodeURIComponent(raw);
    try{
-    const nom=await fetch("https://nominatim.openstreetmap.org/search?format=jsonv2&limit=1&countrycodes=in&q="+encodeURIComponent(term),{headers:{Accept:"application/json"}});
-    if(nom.ok){
-     const rows=await nom.json();
-     if(rows.length){lat=Number(rows[0].lat);lon=Number(rows[0].lon);label=rows[0].display_name||label;break;}
+    const response=await fetch(nomUrl,{headers:{Accept:"application/json"}});
+    if(response.ok){
+     const rows=await response.json();
+     const row=(rows||[]).find(x=>x.lat&&x.lon);
+     if(row){lat=Number(row.lat);lon=Number(row.lon);label=row.display_name||raw;}
     }
    }catch(e){}
   }
   if(!Number.isFinite(lat)||!Number.isFinite(lon)){
-   status.textContent=pinMatch?"Is PIN code ki exact location nahi mili. PIN dobara check karein ya area/city bhi search karein.":"Location nahi mili. Area ke saath city ya PIN code bhi likhein.";
-   toast("Location nahi mili. PIN code ya address check karein.");return;
+   status.textContent="Is address ka map result nahi mila. Address ke saath area/city likhein, ya map par manually exact jagah tap karke pin set karein.";
+   toast("Search result nahi mila. Map par pin manually bhi laga sakte hain.");return;
   }
-  parcelMapInstance.setView([lat,lon],pinMatch?16:17);
+  parcelMapInstance.setView([lat,lon],pin?16:17);
   setParcelMapPin(lat,lon);
-  status.textContent="Location mil gayi: "+(label||raw)+". Ab receiver ke ghar par map ko tap karke exact pin lagayein aur Confirm karein.";
+  status.textContent="Area mil gaya: "+label+". Ab map par receiver ke ghar ki exact jagah tap karein ya pin ko kheenchkar set karein, phir Confirm karein.";
  }catch(e){
-  status.textContent="Search service abhi busy hai. PIN code/address dobara try karein ya map par manually pin lagayein.";
-  toast("Map search nahi chal paayi. Thodi der baad try karein.");
- }finally{button.disabled=false;button.textContent="Search";}
+  status.textContent="Search service ka response nahi aa raha. Internet check karein ya map par manually pin lagayein.";
+  toast("Search abhi nahi chal paayi. Dobara try karein.");
+ }finally{
+  button.disabled=false;button.textContent="Search";
+ }
 }
 function useMapCurrentLocation(){
  if(!navigator.geolocation){toast("Is browser mein GPS available nahi hai.");return;}
