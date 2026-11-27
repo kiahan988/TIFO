@@ -491,7 +491,7 @@ function useCurrentLocation(addressId,statusId){
    if(data.display_name){address.value=data.display_name;status.textContent="Address filled. Please add/check house number and landmark.";}
   }catch(e){status.textContent="GPS found; street address lookup unavailable. Please add house number and landmark.";}
  },e=>{
-  status.textContent=e.code===1?"Permission denied. Allow Location for this site in Chrome settings.":e.code===2?"Location unavailable. Turn on phone GPS and try again.":e.code===3?"Location timed out. Keep GPS on and retry.":"Could not get location. Enter address manually.";
+  status.textContent=e.code===1?"Chrome ne TIFO ki location permission block ki hai. Chrome mein site icon → Permissions → Location → Allow karein. Phone Settings → Apps → Chrome → Permissions → Location bhi Allow karein, phir page reload karein.":e.code===2?"Phone ka GPS/Location ON karein aur khuli jagah par dobara try karein.":e.code===3?"GPS ko location milne mein der hui. Location ON rakhein aur dobara try karein.":"Location nahi mil saki. Permission aur GPS settings check karein.";
  },{enableHighAccuracy:true,timeout:20000,maximumAge:0});
 }
 
