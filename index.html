@@ -240,7 +240,8 @@ footer{text-align:center;padding:25px 15px;color:var(--muted);font-size:12px}
 <div class="map-picker-overlay" id="parcelMapOverlay" role="dialog" aria-modal="true" aria-labelledby="parcelMapTitle">
  <div class="map-picker-box">
   <div class="map-picker-head"><h3 id="parcelMapTitle">📍 Pin delivery location</h3><button type="button" class="popup-close" onclick="closeParcelMap()">×</button></div>
-  <div class="map-picker-search"><input id="parcelMapSearch" placeholder="Search area, landmark, city or PIN code"><button type="button" class="btn" onclick="searchParcelMap()">Search</button></div>
+  <div class="map-picker-search"><input id="parcelMapSearch" placeholder="Search area, landmark, city or PIN code" onkeydown="if(event.key==='Enter'){event.preventDefault();searchParcelMap()}"><button id="parcelMapSearchBtn" type="button" class="btn" onclick="searchParcelMap()">Search</button></div>
+  <p id="parcelMapSearchStatus" class="map-picker-hint" aria-live="polite" style="margin:0 0 8px"></p>
   <div id="parcelMap"></div>
   <p class="map-picker-hint">Map par receiver ke ghar ko tap karein ya pin ko kheenchkar exact jagah par rakhein.</p>
   <div class="map-picker-actions"><button type="button" class="btn green" onclick="confirmParcelMapLocation()">Confirm Receiver Pin Location</button></div>
@@ -575,15 +576,42 @@ function setParcelMapPin(lat,lon){
 }
 function closeParcelMap(){document.getElementById("parcelMapOverlay").style.display="none";}
 async function searchParcelMap(){
- const q=document.getElementById("parcelMapSearch").value.trim();
- if(!q){toast("Area, landmark ya PIN code likhein.");return;}
+ const input=document.getElementById("parcelMapSearch");
+ const status=document.getElementById("parcelMapSearchStatus");
+ const button=document.getElementById("parcelMapSearchBtn");
+ const q=input.value.trim();
+ if(!q){toast("Area, landmark ya PIN code likhein.");input.focus();return;}
+ if(!parcelMapInstance){toast("Map abhi load ho raha hai. Ek second baad try karein.");return;}
+ button.disabled=true;button.textContent="Searching...";status.textContent="Location search ho rahi hai...";
  try{
-  const response=await fetch("https://nominatim.openstreetmap.org/search?format=jsonv2&limit=1&q="+encodeURIComponent(q));
-  const rows=await response.json();
-  if(!rows.length){toast("Location nahi mili. Dusra address try karein.");return;}
-  const lat=Number(rows[0].lat),lon=Number(rows[0].lon);
-  parcelMapInstance.setView([lat,lon],17);setParcelMapPin(lat,lon);
- }catch(e){toast("Map search abhi nahi chal rahi. Map par pin manually rakhein.");}
+  let lat=null,lon=null,label="";
+  // Photon primary geocoder; Nominatim fallback for reliability.
+  try{
+   const url="https://photon.komoot.io/api/?q="+encodeURIComponent(q)+"&limit=5&lang=en";
+   const response=await fetch(url,{headers:{Accept:"application/json"}});
+   if(!response.ok)throw new Error("Photon search unavailable");
+   const data=await response.json();
+   const feature=(data.features||[]).find(f=>f.geometry&&f.geometry.coordinates);
+   if(feature){
+    lon=Number(feature.geometry.coordinates[0]);lat=Number(feature.geometry.coordinates[1]);
+    const p=feature.properties||{};label=[p.name,p.street,p.city||p.locality,p.state,p.postcode].filter(Boolean).join(", ");
+   }
+  }catch(e){}
+  if(!Number.isFinite(lat)||!Number.isFinite(lon)){
+   const url="https://nominatim.openstreetmap.org/search?format=jsonv2&limit=1&countrycodes=in&q="+encodeURIComponent(q);
+   const response=await fetch(url,{headers:{Accept:"application/json"}});
+   if(!response.ok)throw new Error("Search service unavailable");
+   const rows=await response.json();
+   if(rows.length){lat=Number(rows[0].lat);lon=Number(rows[0].lon);label=rows[0].display_name||"";}
+  }
+  if(!Number.isFinite(lat)||!Number.isFinite(lon)){status.textContent="Location nahi mili. Area ke saath city ya PIN code bhi likhein.";toast("Location nahi mili. Dusra address try karein.");return;}
+  parcelMapInstance.setView([lat,lon],17);
+  setParcelMapPin(lat,lon);
+  status.textContent="Location mil gayi: "+(label||q)+". Ab map par exact ghar ki jagah pin set karke confirm karein.";
+ }catch(e){
+  status.textContent="Search service abhi busy hai. Internet check karein ya map par manually pin lagayein.";
+  toast("Map search nahi chal paayi. Thodi der baad dobara try karein.");
+ }finally{button.disabled=false;button.textContent="Search";}
 }
 function useMapCurrentLocation(){
  if(!navigator.geolocation){toast("Is browser mein GPS available nahi hai.");return;}
