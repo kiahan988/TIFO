@@ -123,6 +123,13 @@ main{max-width:1100px;margin:auto;padding:20px 17px}
 .select-line input{width:20px;height:20px;accent-color:var(--red);margin:0}
 .location-btn{margin:9px 0 5px;background:#fff3ec;color:var(--red);border:1px solid #f2c8b8;border-radius:10px;padding:11px 14px;font-weight:900;width:100%;cursor:pointer}
 .location-status{font-size:12px;color:var(--muted);margin:3px 0 10px;min-height:18px}
+.parcel-home-card{display:flex;align-items:center;gap:18px;flex-wrap:wrap;margin:22px 0;padding:20px;border:1px solid #f3c5ae;border-radius:18px;background:linear-gradient(120deg,#fff1e8,#fffaf5);box-shadow:0 8px 24px rgba(90,45,20,.06)}
+.parcel-home-icon{width:64px;height:64px;border-radius:18px;background:#fff;border:1px solid #f5d5c5;display:grid;place-items:center;font-size:34px;flex-shrink:0}
+.parcel-home-copy{flex:1;min-width:180px}
+.parcel-home-copy h2{margin:3px 0;font-size:22px}
+.parcel-home-copy p{margin:4px 0;color:var(--muted);font-size:13px;line-height:1.5}
+.parcel-home-card .btn{white-space:nowrap}
+@media(max-width:600px){.parcel-home-card{gap:12px;padding:15px}.parcel-home-card .btn{width:100%}}
 @media(max-width:600px){.food-grid.sabzi-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.food-select img{height:125px}}
 .section-head{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
 .panel{margin-top:15px}
@@ -243,6 +250,16 @@ footer{text-align:center;padding:25px 15px;color:var(--muted);font-size:12px}
   </div>
  </div>
 
+ <div class="parcel-home-card">
+  <div class="parcel-home-icon">📦</div>
+  <div class="parcel-home-copy">
+   <span class="eyebrow">NEW SERVICE</span>
+   <h2>Send Anything</h2>
+   <p>Ghar se parcel pickup karwao aur apne receiver tak pahunchao.</p>
+  </div>
+  <button class="btn" onclick="openPage('parcel')">Book Parcel Delivery →</button>
+ </div>
+
  <h2 class="section-title">TIFO par aapko kya milega?</h2>
  <div class="features">
   <div class="feature"><strong>🍲 Ghar Jaisa Khana</strong><p>Fresh aur tasty homemade meals.</p></div>
@@ -357,6 +374,8 @@ footer{text-align:center;padding:25px 15px;color:var(--muted);font-size:12px}
    <div><label>Receiver Mobile</label><input id="parcelReceiverPhone" type="tel" maxlength="10" placeholder="10 digit mobile number"></div>
   </div>
   <label>Delivery Address</label><textarea id="parcelDropAddress" placeholder="Receiver house number, area, city, landmark..."></textarea>
+  <button type="button" class="location-btn" onclick="useCurrentLocation('parcelDropAddress','parcelDropStatus')">📍 Use Receiver Current Location</button>
+  <p class="location-status" id="parcelDropStatus" aria-live="polite"></p>
  </div>
  <div class="panel">
   <h3>3. Parcel Information</h3>
@@ -504,7 +523,7 @@ async function calculateParcelFare(){
  result.textContent="Pickup aur delivery distance check ho rahi hai...";
  try{
   const from=tifoLocations.parcelPickupAddress||await geocodeAddress(pickup);
-  const to=await geocodeAddress(drop);
+  const to=tifoLocations.parcelDropAddress||await geocodeAddress(drop);
   const routeUrl="https://router.project-osrm.org/route/v1/driving/"+from.lon+","+from.lat+";"+to.lon+","+to.lat+"?overview=false";
   const routeResponse=await fetch(routeUrl);
   if(!routeResponse.ok)throw new Error("Route service unavailable");
