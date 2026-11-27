@@ -240,7 +240,7 @@ footer{text-align:center;padding:25px 15px;color:var(--muted);font-size:12px}
 <div class="map-picker-overlay" id="parcelMapOverlay" role="dialog" aria-modal="true" aria-labelledby="parcelMapTitle">
  <div class="map-picker-box">
   <div class="map-picker-head"><h3 id="parcelMapTitle">📍 Pin delivery location</h3><button type="button" class="popup-close" onclick="closeParcelMap()">×</button></div>
-  <div class="map-picker-search"><input id="parcelMapSearch" placeholder="Search area, landmark, city or PIN code" onkeydown="if(event.key==='Enter'){event.preventDefault();searchParcelMap()}"><button id="parcelMapSearchBtn" type="button" class="btn" onclick="searchParcelMap()">Search</button></div>
+  <div class="map-picker-search"><input id="parcelMapSearch" placeholder="6-digit PIN code, area, landmark or city search karein"  onkeydown="if(event.key==='Enter'){event.preventDefault();searchParcelMap()}"><button id="parcelMapSearchBtn" type="button" class="btn" onclick="searchParcelMap()">Search</button></div>
   <p id="parcelMapSearchStatus" class="map-picker-hint" aria-live="polite" style="margin:0 0 8px"></p>
   <div id="parcelMap"></div>
   <p class="map-picker-hint">Map par receiver ke ghar ko tap karein ya pin ko kheenchkar exact jagah par rakhein.</p>
@@ -364,7 +364,7 @@ footer{text-align:center;padding:25px 15px;color:var(--muted);font-size:12px}
    <div><label>Your Name</label><input id="dailyName" placeholder="Enter your name"></div>
    <div><label>Mobile Number</label><input id="dailyPhone" type="tel" maxlength="10" placeholder="10 digit mobile number"></div>
   </div>
-  <label>Delivery Address</label><textarea id="dailyAddress" placeholder="House number, area, landmark..."></textarea>
+  <label>Delivery Address</label><textarea id="dailyAddress" placeholder="House number, area, landmark..." oninput="clearSelectedLocation('dailyAddress','dailyLocationStatus')"></textarea>
   <button type="button" class="location-btn" onclick="useCurrentLocation('dailyAddress','dailyLocationStatus')">📍 Use My Current Location</button>
   <p class="location-status" id="dailyLocationStatus" aria-live="polite"></p>
   <label>Meal Timing</label>
@@ -391,7 +391,7 @@ footer{text-align:center;padding:25px 15px;color:var(--muted);font-size:12px}
    <div><label>Your Name</label><input id="monthlyName" placeholder="Enter your name"></div>
    <div><label>Mobile Number</label><input id="monthlyPhone" type="tel" maxlength="10" placeholder="10 digit mobile number"></div>
   </div>
-  <label>Full Delivery Address</label><textarea id="monthlyAddress" placeholder="House number, area, landmark..."></textarea>
+  <label>Full Delivery Address</label><textarea id="monthlyAddress" placeholder="House number, area, landmark..." oninput="clearSelectedLocation('monthlyAddress','monthlyLocationStatus')"></textarea>
   <button type="button" class="location-btn" onclick="useCurrentLocation('monthlyAddress','monthlyLocationStatus')">📍 Use My Current Location</button>
   <p class="location-status" id="monthlyLocationStatus" aria-live="polite"></p>
   <div class="form-grid">
@@ -409,30 +409,30 @@ footer{text-align:center;padding:25px 15px;color:var(--muted);font-size:12px}
  <div class="panel">
   <h3>1. Sender Details (Pickup)</h3>
   <div class="form-grid">
-   <div><label>Sender Name</label><input id="parcelSenderName" placeholder="Your full name"></div>
-   <div><label>Sender Mobile</label><input id="parcelSenderPhone" type="tel" maxlength="10" placeholder="10 digit mobile number"></div>
+   <div><label>Sender Name</label><input id="parcelSenderName" placeholder="Your full name" oninput="invalidateParcelQuote()"></div>
+   <div><label>Sender Mobile</label><input id="parcelSenderPhone" type="tel" maxlength="10" placeholder="10 digit mobile number" oninput="invalidateParcelQuote()"></div>
   </div>
-  <label>Pickup Address</label><textarea id="parcelPickupAddress" placeholder="House number, area, colony, landmark..." oninput="clearSelectedLocation('parcelPickupAddress','parcelPickupStatus')"></textarea>
+  <label>Pickup Address</label><textarea id="parcelPickupAddress" placeholder="House number, area, colony, landmark..." oninput="clearSelectedLocation('parcelPickupAddress','parcelPickupStatus');invalidateParcelQuote()"></textarea>
   <button type="button" class="location-btn" onclick="useCurrentLocation('parcelPickupAddress','parcelPickupStatus')">📍 Use My Current Location</button>
   <p class="location-status" id="parcelPickupStatus" aria-live="polite"></p>
  </div>
  <div class="panel">
   <h3>2. Receiver Details (Delivery)</h3>
   <div class="form-grid">
-   <div><label>Receiver Name</label><input id="parcelReceiverName" placeholder="Receiver full name"></div>
-   <div><label>Receiver Mobile</label><input id="parcelReceiverPhone" type="tel" maxlength="10" placeholder="10 digit mobile number"></div>
+   <div><label>Receiver Name</label><input id="parcelReceiverName" placeholder="Receiver full name" oninput="invalidateParcelQuote()"></div>
+   <div><label>Receiver Mobile</label><input id="parcelReceiverPhone" type="tel" maxlength="10" placeholder="10 digit mobile number" oninput="invalidateParcelQuote()"></div>
   </div>
-  <label>Delivery Address</label><textarea id="parcelDropAddress" placeholder="Receiver house number, area, city, landmark..." oninput="clearSelectedLocation('parcelDropAddress','parcelDropStatus')"></textarea>
+  <label>Delivery Address</label><textarea id="parcelDropAddress" placeholder="Receiver house number, area, city, landmark..." oninput="clearSelectedLocation('parcelDropAddress','parcelDropStatus');invalidateParcelQuote()"></textarea>
   <button type="button" class="location-btn" onclick="openParcelMap('parcelDropAddress','parcelDropStatus')">🗺️ Choose Receiver Location on Map</button>
   <p class="location-status" id="parcelDropStatus" aria-live="polite"></p>
  </div>
  <div class="panel">
   <h3>3. Parcel Information</h3>
   <div class="form-grid">
-   <div><label>What are you sending?</label><select id="parcelCategory"><option value="parcel">Parcel / Other Items</option><option value="lunchbox">Lunch Box</option><option value="documents">Documents</option></select></div>
-   <div><label>Parcel Weight (kg)</label><input id="parcelWeight" type="number" min="0.1" step="0.1" placeholder="Example: 2"></div>
+   <div><label>What are you sending?</label><select id="parcelCategory" onchange="invalidateParcelQuote()"><option value="parcel">Parcel / Other Items</option><option value="lunchbox">Lunch Box</option><option value="documents">Documents</option></select></div>
+   <div><label>Parcel Weight (kg)</label><input id="parcelWeight" type="number" min="0.1" step="0.1" placeholder="Example: 2" oninput="invalidateParcelQuote()"></div>
   </div>
-  <label>Item details</label><input id="parcelDescription" placeholder="Documents, clothes, gift, lunch box...">
+  <label>Item details</label><input id="parcelDescription" placeholder="Documents, clothes, gift, lunch box..." oninput="invalidateParcelQuote()">
   <label style="margin-top:12px">Parcel ki Photo Upload Karein (Required)</label>
   <input id="parcelPhoto" type="file" accept="image/*" capture="environment" onchange="previewParcelPhoto(this)" style="width:100%;padding:10px;border:1px solid var(--border);border-radius:10px;background:#fff">
   <div id="parcelPhotoPreview" style="display:none;margin-top:10px"></div>
@@ -671,6 +671,11 @@ async function confirmParcelMapLocation(){
  closeParcelMap();
 }
 
+function invalidateParcelQuote(){
+ if(typeof parcelQuote!=="undefined")parcelQuote=null;
+ const add=document.getElementById("addParcelButton");if(add)add.style.display="none";
+ const result=document.getElementById("parcelFareResult");if(result){result.style.display="none";result.textContent="";}
+}
 function clearSelectedLocation(addressId,statusId){
  if(tifoLocations[addressId])delete tifoLocations[addressId];
  const address=document.getElementById(addressId);
@@ -726,7 +731,7 @@ let parcelQuote=null;
 let parcelPhotoData=null;
 let paymentProofData=null;
 function readCompressedImage(file,maxSize=1100,quality=0.72){return new Promise((resolve,reject)=>{if(!file||!file.type.startsWith("image/")){reject(new Error("Image file select karein."));return;}const reader=new FileReader();reader.onerror=()=>reject(new Error("Image read nahi hui."));reader.onload=()=>{const img=new Image();img.onerror=()=>reject(new Error("Image open nahi hui."));img.onload=()=>{const scale=Math.min(1,maxSize/Math.max(img.width,img.height));const c=document.createElement("canvas");c.width=Math.round(img.width*scale);c.height=Math.round(img.height*scale);c.getContext("2d").drawImage(img,0,0,c.width,c.height);resolve(c.toDataURL("image/jpeg",quality));};img.src=reader.result;};reader.readAsDataURL(file);});}
-async function previewParcelPhoto(input){const box=document.getElementById("parcelPhotoPreview");parcelPhotoData=null;box.style.display="none";if(!input.files||!input.files[0])return;try{parcelPhotoData=await readCompressedImage(input.files[0]);box.innerHTML='<img src="'+parcelPhotoData+'" style="max-width:180px;max-height:180px;object-fit:cover;border-radius:12px"><p class="muted">Parcel photo attach ho gayi.</p>';box.style.display="block";}catch(e){input.value="";toast(e.message);}}
+async function previewParcelPhoto(input){invalidateParcelQuote();const box=document.getElementById("parcelPhotoPreview");parcelPhotoData=null;box.style.display="none";if(!input.files||!input.files[0])return;try{parcelPhotoData=await readCompressedImage(input.files[0]);box.innerHTML='<img src="'+parcelPhotoData+'" style="max-width:180px;max-height:180px;object-fit:cover;border-radius:12px"><p class="muted">Parcel photo attach ho gayi.</p>';box.style.display="block";}catch(e){input.value="";toast(e.message);}}
 async function handlePaymentProof(input){paymentProofData=null;const status=document.getElementById("paymentProofStatus"),options=document.getElementById("afterPaymentOptions");options.style.display="none";if(!input.files||!input.files[0])return;try{paymentProofData=await readCompressedImage(input.files[0],1400,0.78);status.textContent="Payment screenshot upload ho gaya. Ab neeche ke options khul gaye hain.";options.style.display="grid";}catch(e){input.value="";status.textContent=e.message;}}
 async function calculateParcelFare(){
  const senderName=document.getElementById("parcelSenderName").value.trim();
