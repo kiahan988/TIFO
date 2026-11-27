@@ -412,7 +412,7 @@ footer{text-align:center;padding:25px 15px;color:var(--muted);font-size:12px}
    <div><label>Sender Name</label><input id="parcelSenderName" placeholder="Your full name"></div>
    <div><label>Sender Mobile</label><input id="parcelSenderPhone" type="tel" maxlength="10" placeholder="10 digit mobile number"></div>
   </div>
-  <label>Pickup Address</label><textarea id="parcelPickupAddress" placeholder="House number, area, colony, landmark..."></textarea>
+  <label>Pickup Address</label><textarea id="parcelPickupAddress" placeholder="House number, area, colony, landmark..." oninput="clearSelectedLocation('parcelPickupAddress','parcelPickupStatus')"></textarea>
   <button type="button" class="location-btn" onclick="useCurrentLocation('parcelPickupAddress','parcelPickupStatus')">📍 Use My Current Location</button>
   <p class="location-status" id="parcelPickupStatus" aria-live="polite"></p>
  </div>
@@ -422,7 +422,7 @@ footer{text-align:center;padding:25px 15px;color:var(--muted);font-size:12px}
    <div><label>Receiver Name</label><input id="parcelReceiverName" placeholder="Receiver full name"></div>
    <div><label>Receiver Mobile</label><input id="parcelReceiverPhone" type="tel" maxlength="10" placeholder="10 digit mobile number"></div>
   </div>
-  <label>Delivery Address</label><textarea id="parcelDropAddress" placeholder="Receiver house number, area, city, landmark..."></textarea>
+  <label>Delivery Address</label><textarea id="parcelDropAddress" placeholder="Receiver house number, area, city, landmark..." oninput="clearSelectedLocation('parcelDropAddress','parcelDropStatus')"></textarea>
   <button type="button" class="location-btn" onclick="openParcelMap('parcelDropAddress','parcelDropStatus')">🗺️ Choose Receiver Location on Map</button>
   <p class="location-status" id="parcelDropStatus" aria-live="polite"></p>
  </div>
@@ -551,8 +551,14 @@ let parcelMapInstance=null,parcelMapMarker=null,parcelMapTarget=null,parcelMapAd
 function openParcelMap(addressId,statusId){
  parcelMapAddressId=addressId;parcelMapStatusId=statusId;
  const existing=tifoLocations[addressId];
+ const hasPin=existing&&Number.isFinite(existing.lat)&&Number.isFinite(existing.lon);
  const fallback=[27.8974,78.0880];
- const center=existing?[existing.lat,existing.lon]:fallback;
+ const center=hasPin?[existing.lat,existing.lon]:fallback;
+ parcelMapChosen=hasPin?{lat:existing.lat,lon:existing.lon}:null;
+ const search=document.getElementById("parcelMapSearch");
+ const searchStatus=document.getElementById("parcelMapSearchStatus");
+ if(search)search.value="";
+ if(searchStatus)searchStatus.textContent=hasPin?"Pehle se selected location map par dikh rahi hai.":"PIN code ya area search karein, ya map par exact jagah tap karein.";
  document.getElementById("parcelMapOverlay").style.display="flex";
  setTimeout(()=>{
   if(!window.L){toast("Map load nahi hua. Internet check karke dobara try karein.");return;}
@@ -560,18 +566,17 @@ function openParcelMap(addressId,statusId){
    parcelMapInstance=L.map("parcelMap").setView(center,15);
    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{maxZoom:19,attribution:"© OpenStreetMap"}).addTo(parcelMapInstance);
    parcelMapInstance.on("click",e=>setParcelMapPin(e.latlng.lat,e.latlng.lng));
-  }else{parcelMapInstance.setView(center,16);}
-  parcelMapChosen={lat:center[0],lon:center[1]};
-  if(parcelMapMarker)parcelMapMarker.remove();
-  parcelMapMarker=L.marker(center,{draggable:true}).addTo(parcelMapInstance);
-  parcelMapMarker.on("dragend",()=>{const p=parcelMapMarker.getLatLng();parcelMapChosen={lat:p.lat,lon:p.lng};});
+  }else{parcelMapInstance.setView(center,hasPin?17:13);}
+  if(parcelMapMarker){parcelMapMarker.remove();parcelMapMarker=null;}
+  if(hasPin)setParcelMapPin(existing.lat,existing.lon);
   parcelMapInstance.invalidateSize();
- },180);
+ },250);
 }
 function setParcelMapPin(lat,lon){
  parcelMapChosen={lat,lon};
  if(parcelMapMarker)parcelMapMarker.setLatLng([lat,lon]);
  else parcelMapMarker=L.marker([lat,lon],{draggable:true}).addTo(parcelMapInstance);
+ parcelMapMarker.off("dragend");
  parcelMapMarker.on("dragend",()=>{const p=parcelMapMarker.getLatLng();parcelMapChosen={lat:p.lat,lon:p.lng};});
 }
 function closeParcelMap(){document.getElementById("parcelMapOverlay").style.display="none";}
@@ -579,38 +584,67 @@ async function searchParcelMap(){
  const input=document.getElementById("parcelMapSearch");
  const status=document.getElementById("parcelMapSearchStatus");
  const button=document.getElementById("parcelMapSearchBtn");
- const q=input.value.trim();
- if(!q){toast("Area, landmark ya PIN code likhein.");input.focus();return;}
- if(!parcelMapInstance){toast("Map abhi load ho raha hai. Ek second baad try karein.");return;}
+ const raw=input.value.trim();
+ if(!raw){status.textContent="PIN code, area ya landmark likhein.";toast("Location likhkar Search dabayein.");input.focus();return;}
+ if(!parcelMapInstance){status.textContent="Map load ho raha hai. Thodi der baad try karein.";return;}
  button.disabled=true;button.textContent="Searching...";status.textContent="Location search ho rahi hai...";
  try{
-  let lat=null,lon=null,label="";
-  // Photon primary geocoder; Nominatim fallback for reliability.
-  try{
-   const url="https://photon.komoot.io/api/?q="+encodeURIComponent(q)+"&limit=5&lang=en";
-   const response=await fetch(url,{headers:{Accept:"application/json"}});
-   if(!response.ok)throw new Error("Photon search unavailable");
-   const data=await response.json();
-   const feature=(data.features||[]).find(f=>f.geometry&&f.geometry.coordinates);
-   if(feature){
-    lon=Number(feature.geometry.coordinates[0]);lat=Number(feature.geometry.coordinates[1]);
-    const p=feature.properties||{};label=[p.name,p.street,p.city||p.locality,p.state,p.postcode].filter(Boolean).join(", ");
-   }
-  }catch(e){}
-  if(!Number.isFinite(lat)||!Number.isFinite(lon)){
-   const url="https://nominatim.openstreetmap.org/search?format=jsonv2&limit=1&countrycodes=in&q="+encodeURIComponent(q);
-   const response=await fetch(url,{headers:{Accept:"application/json"}});
-   if(!response.ok)throw new Error("Search service unavailable");
-   const rows=await response.json();
-   if(rows.length){lat=Number(rows[0].lat);lon=Number(rows[0].lon);label=rows[0].display_name||"";}
+  let lat=NaN,lon=NaN,label="";
+  const pinMatch=raw.match(/^\d{6}$/);
+  let searchTerms=[];
+  if(pinMatch){
+   status.textContent="PIN code "+raw+" ki post office details dhoondh rahe hain...";
+   try{
+    const pr=await fetch("https://api.postalpincode.in/pincode/"+raw,{headers:{Accept:"application/json"}});
+    if(pr.ok){
+     const pd=await pr.json();
+     const offices=pd&&pd[0]&&pd[0].PostOffice||[];
+     if(offices.length){
+      const office=offices[0];
+      label=[office.Name,office.District,office.State,office.Pincode].filter(Boolean).join(", ");
+      searchTerms.push(label+", India");
+      offices.slice(1,4).forEach(o=>searchTerms.push([o.Name,o.District,o.State,o.Pincode,"India"].filter(Boolean).join(", ")));
+     }
+    }
+   }catch(e){}
+   searchTerms.push(raw+", India");
+  }else{
+   searchTerms.push(raw+", India");
   }
-  if(!Number.isFinite(lat)||!Number.isFinite(lon)){status.textContent="Location nahi mili. Area ke saath city ya PIN code bhi likhein.";toast("Location nahi mili. Dusra address try karein.");return;}
-  parcelMapInstance.setView([lat,lon],17);
+  // Try postcode-aware/locality search first, then two independent map search services.
+  for(const term of searchTerms){
+   try{
+    const photon=await fetch("https://photon.komoot.io/api/?q="+encodeURIComponent(term)+"&limit=5&lang=en",{headers:{Accept:"application/json"}});
+    if(photon.ok){
+     const data=await photon.json();
+     const feature=(data.features||[]).find(f=>f.geometry&&f.geometry.coordinates&&(!f.properties.country||/india/i.test(f.properties.country)));
+     if(feature){
+      lon=Number(feature.geometry.coordinates[0]);lat=Number(feature.geometry.coordinates[1]);
+      const p=feature.properties||{};
+      label=label||[p.name,p.street,p.city||p.locality,p.state,p.postcode].filter(Boolean).join(", ");
+      break;
+     }
+    }
+   }catch(e){}
+   if(Number.isFinite(lat)&&Number.isFinite(lon))break;
+   try{
+    const nom=await fetch("https://nominatim.openstreetmap.org/search?format=jsonv2&limit=1&countrycodes=in&q="+encodeURIComponent(term),{headers:{Accept:"application/json"}});
+    if(nom.ok){
+     const rows=await nom.json();
+     if(rows.length){lat=Number(rows[0].lat);lon=Number(rows[0].lon);label=rows[0].display_name||label;break;}
+    }
+   }catch(e){}
+  }
+  if(!Number.isFinite(lat)||!Number.isFinite(lon)){
+   status.textContent=pinMatch?"Is PIN code ki exact location nahi mili. PIN dobara check karein ya area/city bhi search karein.":"Location nahi mili. Area ke saath city ya PIN code bhi likhein.";
+   toast("Location nahi mili. PIN code ya address check karein.");return;
+  }
+  parcelMapInstance.setView([lat,lon],pinMatch?16:17);
   setParcelMapPin(lat,lon);
-  status.textContent="Location mil gayi: "+(label||q)+". Ab map par exact ghar ki jagah pin set karke confirm karein.";
+  status.textContent="Location mil gayi: "+(label||raw)+". Ab receiver ke ghar par map ko tap karke exact pin lagayein aur Confirm karein.";
  }catch(e){
-  status.textContent="Search service abhi busy hai. Internet check karein ya map par manually pin lagayein.";
-  toast("Map search nahi chal paayi. Thodi der baad dobara try karein.");
+  status.textContent="Search service abhi busy hai. PIN code/address dobara try karein ya map par manually pin lagayein.";
+  toast("Map search nahi chal paayi. Thodi der baad try karein.");
  }finally{button.disabled=false;button.textContent="Search";}
 }
 function useMapCurrentLocation(){
@@ -637,6 +671,14 @@ async function confirmParcelMapLocation(){
  closeParcelMap();
 }
 
+function clearSelectedLocation(addressId,statusId){
+ if(tifoLocations[addressId])delete tifoLocations[addressId];
+ const address=document.getElementById(addressId);
+ if(address)delete address.dataset.locationAllowed;
+ const status=document.getElementById(statusId);
+ if(status)status.textContent="Address change hui hai. Location dobara select karein.";
+ if(typeof parcelQuote!=="undefined"){parcelQuote=null;const add=document.getElementById("addParcelButton");if(add)add.style.display="none";}
+}
 function requireCurrentLocation(addressId,statusId,label){
  const status=document.getElementById(statusId);
  if(tifoLocations[addressId] && Number.isFinite(tifoLocations[addressId].lat) && Number.isFinite(tifoLocations[addressId].lon)) return true;
@@ -857,7 +899,7 @@ function renderCart(){
   let details=item.type==="Daily Tiffin"
    ?`<p class="muted">Sabzi: ${item.sabzis.map(escapeHTML).join(", ")}<br>Roti: ${escapeHTML(item.roti)}<br>Butter roti: ${item.butterQty} | Water: ${item.waterQty} | Meal: ${escapeHTML(item.meal)}</p>`
    :item.type==="Send Anything / Parcel"
-   ?`<p class="muted">From: ${escapeHTML(item.senderName)} (${escapeHTML(item.senderPhone)})<br>Pickup: ${escapeHTML(item.pickup)}<br>To: ${escapeHTML(item.receiverName)} (${escapeHTML(item.receiverPhone)})<br>Delivery: ${escapeHTML(item.drop)}<br>Parcel: ${escapeHTML(item.description)} | Weight: ${escapeHTML(item.weight)} kg<br>Distance: ${Number(item.distanceKm).toFixed(1)} km</p>`
+   ?`<p class="muted">From: ${escapeHTML(item.senderName)} (${escapeHTML(item.senderPhone)})<br>Pickup: ${escapeHTML(item.pickup)}<br>To: ${escapeHTML(item.receiverName)} (${escapeHTML(item.receiverPhone)})<br>Delivery: ${escapeHTML(item.drop)}<br>Parcel: ${escapeHTML(item.description)} | Weight: ${escapeHTML(item.weight)} kg<br>Distance: ${Number(item.distanceKm).toFixed(1)} km</p>${item.parcelPhoto?'<img src="'+item.parcelPhoto+'" alt="Parcel photo" style="width:110px;height:110px;object-fit:cover;border-radius:10px;margin-top:8px">':''}`
    :`<p class="muted">Start Date: ${escapeHTML(item.start)} | Meal: ${escapeHTML(item.meal)}</p>`;
   html+=`<div class="cart-item">
    <div style="display:flex;justify-content:space-between;align-items:center;gap:10px">
