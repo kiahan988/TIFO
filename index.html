@@ -192,7 +192,21 @@ footer{text-align:center;padding:25px 15px;color:var(--muted);font-size:12px}
 .send-anything-items span{display:inline-block;padding:8px 11px;border-radius:999px;background:#fff0e7;border:1px solid #f2c8b8;color:#7b351f;font-size:13px;font-weight:800;}
 .send-anything-modal .popup-close{position:absolute;right:12px;top:10px;width:34px;height:34px;border:0;border-radius:50%;background:#f4e9df;color:#44372f;font-size:23px;line-height:1;cursor:pointer;}
 @keyframes sendPopupIn{from{opacity:0;transform:translateY(12px) scale(.97)}to{opacity:1;transform:translateY(0) scale(1)}}
+
+.map-picker-overlay{position:fixed;inset:0;z-index:100000;background:rgba(20,16,13,.72);display:none;align-items:center;justify-content:center;padding:12px}
+.map-picker-box{width:min(720px,100%);background:#fffaf3;border-radius:18px;padding:14px;box-shadow:0 16px 55px rgba(0,0,0,.3)}
+.map-picker-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:10px}
+.map-picker-head h3{margin:0;font-size:18px}
+.map-picker-search{display:flex;gap:8px;margin-bottom:9px}
+.map-picker-search input{flex:1;min-width:0;padding:11px;border:1px solid var(--border);border-radius:10px}
+#parcelMap{height:min(52vh,420px);min-height:280px;border-radius:12px;z-index:1}
+.map-picker-actions{display:flex;gap:8px;margin-top:10px}
+.map-picker-actions button{flex:1}
+.map-picker-hint{font-size:12px;color:var(--muted);margin:8px 0 0}
+@media(max-width:480px){.map-picker-box{padding:10px}.map-picker-actions{flex-direction:column}#parcelMap{height:48vh}}
 </style>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 </head>
 <body>
 
@@ -220,6 +234,16 @@ footer{text-align:center;padding:25px 15px;color:var(--muted);font-size:12px}
   <p>Ghar se jo bhejna ho, hum pickup karke receiver tak pahunchayenge.</p>
   <div class="send-anything-items"><span>📦 Parcel</span><span>📄 Documents</span><span>🍱 Lunch Box</span><span>🪪 Aadhaar Card</span><span>✨ Kuch bhi</span></div>
   <button class="btn popup-book" type="button" onclick="openParcelFromPopup()">Book Parcel Delivery →</button>
+ </div>
+</div>
+
+<div class="map-picker-overlay" id="parcelMapOverlay" role="dialog" aria-modal="true" aria-labelledby="parcelMapTitle">
+ <div class="map-picker-box">
+  <div class="map-picker-head"><h3 id="parcelMapTitle">📍 Pin delivery location</h3><button type="button" class="popup-close" onclick="closeParcelMap()">×</button></div>
+  <div class="map-picker-search"><input id="parcelMapSearch" placeholder="Search area, landmark, city or PIN code"><button type="button" class="btn" onclick="searchParcelMap()">Search</button></div>
+  <div id="parcelMap"></div>
+  <p class="map-picker-hint">Map par receiver ke ghar ko tap karein ya pin ko kheenchkar exact jagah par rakhein.</p>
+  <div class="map-picker-actions"><button type="button" class="btn secondary" onclick="useMapCurrentLocation()">Use My Current Location</button><button type="button" class="btn green" onclick="confirmParcelMapLocation()">Confirm This Location</button></div>
  </div>
 </div>
 <main>
@@ -389,6 +413,7 @@ footer{text-align:center;padding:25px 15px;color:var(--muted);font-size:12px}
   </div>
   <label>Pickup Address</label><textarea id="parcelPickupAddress" placeholder="House number, area, colony, landmark..."></textarea>
   <button type="button" class="location-btn" onclick="useCurrentLocation('parcelPickupAddress','parcelPickupStatus')">📍 Use My Current Location</button>
+  <button type="button" class="location-btn" onclick="openParcelMap('parcelPickupAddress','parcelPickupStatus')">🗺️ Choose Pickup Location on Map</button>
   <p class="location-status" id="parcelPickupStatus" aria-live="polite"></p>
  </div>
  <div class="panel">
@@ -399,6 +424,7 @@ footer{text-align:center;padding:25px 15px;color:var(--muted);font-size:12px}
   </div>
   <label>Delivery Address</label><textarea id="parcelDropAddress" placeholder="Receiver house number, area, city, landmark..."></textarea>
   <button type="button" class="location-btn" onclick="useCurrentLocation('parcelDropAddress','parcelDropStatus')">📍 Use Receiver Current Location</button>
+  <button type="button" class="location-btn" onclick="openParcelMap('parcelDropAddress','parcelDropStatus')">🗺️ Choose Receiver Location on Map</button>
   <p class="location-status" id="parcelDropStatus" aria-live="polite"></p>
  </div>
  <div class="panel">
@@ -517,11 +543,75 @@ function updateCartCount(){
  document.getElementById("cartCount").textContent=cart.length;
 }
 
+
+let parcelMapInstance=null,parcelMapMarker=null,parcelMapTarget=null,parcelMapAddressId=null,parcelMapStatusId=null,parcelMapChosen=null;
+function openParcelMap(addressId,statusId){
+ parcelMapAddressId=addressId;parcelMapStatusId=statusId;
+ const existing=tifoLocations[addressId];
+ const fallback=[27.8974,78.0880];
+ const center=existing?[existing.lat,existing.lon]:fallback;
+ document.getElementById("parcelMapOverlay").style.display="flex";
+ setTimeout(()=>{
+  if(!window.L){toast("Map load nahi hua. Internet check karke dobara try karein.");return;}
+  if(!parcelMapInstance){
+   parcelMapInstance=L.map("parcelMap").setView(center,15);
+   L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{maxZoom:19,attribution:"© OpenStreetMap"}).addTo(parcelMapInstance);
+   parcelMapInstance.on("click",e=>setParcelMapPin(e.latlng.lat,e.latlng.lng));
+  }else{parcelMapInstance.setView(center,16);}
+  parcelMapChosen={lat:center[0],lon:center[1]};
+  if(parcelMapMarker)parcelMapMarker.remove();
+  parcelMapMarker=L.marker(center,{draggable:true}).addTo(parcelMapInstance);
+  parcelMapMarker.on("dragend",()=>{const p=parcelMapMarker.getLatLng();parcelMapChosen={lat:p.lat,lon:p.lng};});
+  parcelMapInstance.invalidateSize();
+ },180);
+}
+function setParcelMapPin(lat,lon){
+ parcelMapChosen={lat,lon};
+ if(parcelMapMarker)parcelMapMarker.setLatLng([lat,lon]);
+ else parcelMapMarker=L.marker([lat,lon],{draggable:true}).addTo(parcelMapInstance);
+ parcelMapMarker.on("dragend",()=>{const p=parcelMapMarker.getLatLng();parcelMapChosen={lat:p.lat,lon:p.lng};});
+}
+function closeParcelMap(){document.getElementById("parcelMapOverlay").style.display="none";}
+async function searchParcelMap(){
+ const q=document.getElementById("parcelMapSearch").value.trim();
+ if(!q){toast("Area, landmark ya PIN code likhein.");return;}
+ try{
+  const response=await fetch("https://nominatim.openstreetmap.org/search?format=jsonv2&limit=1&q="+encodeURIComponent(q));
+  const rows=await response.json();
+  if(!rows.length){toast("Location nahi mili. Dusra address try karein.");return;}
+  const lat=Number(rows[0].lat),lon=Number(rows[0].lon);
+  parcelMapInstance.setView([lat,lon],17);setParcelMapPin(lat,lon);
+ }catch(e){toast("Map search abhi nahi chal rahi. Map par pin manually rakhein.");}
+}
+function useMapCurrentLocation(){
+ if(!navigator.geolocation){toast("Is browser mein GPS available nahi hai.");return;}
+ navigator.geolocation.getCurrentPosition(p=>{
+  parcelMapInstance.setView([p.coords.latitude,p.coords.longitude],17);
+  setParcelMapPin(p.coords.latitude,p.coords.longitude);
+ },()=>toast("GPS permission nahi mili. Map par jagah search karke pin lagayein."),{enableHighAccuracy:true,timeout:20000,maximumAge:0});
+}
+async function confirmParcelMapLocation(){
+ if(!parcelMapChosen){toast("Map par receiver/pickup ki jagah par pin lagayein.");return;}
+ const {lat,lon}=parcelMapChosen;
+ tifoLocations[parcelMapAddressId]={lat,lon};
+ const address=document.getElementById(parcelMapAddressId);
+ const status=document.getElementById(parcelMapStatusId);
+ address.dataset.locationAllowed="true";
+ address.value="Map Pin ("+lat.toFixed(6)+", "+lon.toFixed(6)+")";
+ if(status)status.textContent="Map location selected. House/flat number aur landmark bhi add karein.";
+ try{
+  const response=await fetch("https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat="+encodeURIComponent(lat)+"&lon="+encodeURIComponent(lon));
+  const data=await response.json();
+  if(data.display_name)address.value=data.display_name;
+ }catch(e){}
+ closeParcelMap();
+}
+
 function requireCurrentLocation(addressId,statusId,label){
  const status=document.getElementById(statusId);
  if(tifoLocations[addressId] && Number.isFinite(tifoLocations[addressId].lat) && Number.isFinite(tifoLocations[addressId].lon)) return true;
- if(status) status.textContent="Order/booking ke liye "+label+" ki GPS location zaroori hai. Pehle Use My Current Location dabakar Allow karein.";
- toast(label+" ki current location allow karna zaroori hai. Location button dabayein.");
+ if(status) status.textContent=label+" ki location zaroori hai. Current Location lein ya Map par pin select karein.";
+ toast(label+" ki location select karein: GPS ya Map pin.");
  return false;
 }
 
