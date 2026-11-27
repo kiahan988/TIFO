@@ -1,399 +1,615 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#ed3e13">
+<title>TIFO | Ghar Jaisa Khana</title>
+<style>
+:root{--red:#ed3e13;--dark:#211c18;--cream:#fffaf3;--green:#078345;--muted:#766e66;--border:#eee2d3;--white:#fff}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--cream);color:var(--dark);font-family:Arial,Helvetica,sans-serif;padding-bottom:82px}
+button,input,select,textarea{font:inherit}
+button{cursor:pointer}
+header{background:#fff;position:sticky;top:0;z-index:20;border-bottom:1px solid var(--border)}
+.topbar{max-width:1150px;margin:auto;padding:13px 18px;display:flex;align-items:center;justify-content:space-between;gap:12px}
+.logo{font-size:27px;font-weight:900;color:var(--red);letter-spacing:1px}
+.logo small{display:block;color:var(--dark);font-size:10px;letter-spacing:2px}
+nav{display:flex;gap:7px;align-items:center;flex-wrap:wrap}
+.navbtn{border:0;background:transparent;padding:10px 12px;border-radius:9px;font-weight:700;color:var(--dark)}
+.navbtn.active,.navbtn:hover{background:#fff0e9;color:var(--red)}
+.cart-top{background:var(--red);color:#fff;border:0;border-radius:10px;padding:11px 15px;font-weight:800}
+main{max-width:1100px;margin:auto;padding:20px 17px}
+.page{display:none}
+.page.active{display:block}
+.hero{background:linear-gradient(115deg,#291d17,#5b2819);color:white;border-radius:22px;padding:35px 28px;display:grid;grid-template-columns:1.2fr .8fr;gap:20px;align-items:center;overflow:hidden}
+.hero h1{font-size:clamp(32px,5vw,53px);line-height:1.08;margin:10px 0}
+.hero p{color:#f5dfd1;line-height:1.6}
+.eyebrow{color:#ffb69d;font-size:12px;font-weight:900;letter-spacing:2px}
+.btn{border:0;border-radius:11px;padding:13px 18px;font-weight:800;background:var(--red);color:white}
+.btn:hover{filter:brightness(.94)}
+.btn.secondary{background:#fff0e9;color:var(--red)}
+.btn.green{background:var(--green)}
+.btn.dark{background:var(--dark)}
+.btn.light{background:#f5eee6;color:var(--dark)}
+.btn:disabled{opacity:.5;cursor:not-allowed}
 
+/* Cute Cat + Thinking Pop-up Styles */
+.cat-stage{
+  position:relative;
+  background:radial-gradient(circle at top,#fff7ee,#f6e2ce);
+  border:2px solid rgba(255,214,186,.45);
+  border-radius:18px;
+  padding:58px 16px 14px;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  min-height:240px;
+  box-shadow:inset 0 2px 10px rgba(0,0,0,.08);
+}
+.thinking-popup{
+  position:absolute;
+  top:10px;
+  left:50%;
+  transform:translateX(-50%);
+  background:#ffffff;
+  color:#211c18;
+  font-size:13px;
+  font-weight:800;
+  padding:8px 14px;
+  border-radius:16px;
+  border:2px solid #211c18;
+  box-shadow:0 6px 16px rgba(0,0,0,.18);
+  white-space:nowrap;
+  z-index:2;
+  animation:floatBubble 2.6s ease-in-out infinite;
+}
+.thinking-popup::after{
+  content:"";
+  position:absolute;
+  bottom:-8px;
+  left:50%;
+  transform:translateX(-50%);
+  width:10px;
+  height:10px;
+  background:#ffffff;
+  border-right:2px solid #211c18;
+  border-bottom:2px solid #211c18;
+  border-radius:50%;
+}
+.thinking-popup::before{
+  content:"";
+  position:absolute;
+  bottom:-16px;
+  left:calc(50% + 4px);
+  width:6px;
+  height:6px;
+  background:#ffffff;
+  border:2px solid #211c18;
+  border-radius:50%;
+}
+.cute-cat-svg{
+  width:145px;
+  height:145px;
+  animation:catBob 3s ease-in-out infinite;
+}
+@keyframes floatBubble{
+  0%,100%{transform:translateX(-50%) translateY(0px)}
+  50%{transform:translateX(-50%) translateY(-4px)}
+}
+@keyframes catBob{
+  0%,100%{transform:translateY(0px)}
+  50%{transform:translateY(3px)}
+}
+
+.section-title{font-size:25px;margin:27px 0 14px}
+.features,.plans,.food-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:15px}
+.feature,.card,.panel,.plan{background:#fff;border:1px solid var(--border);border-radius:17px;padding:17px}
+.feature strong{font-size:16px}
+.feature p,.muted{color:var(--muted);font-size:13px;line-height:1.5}
+.card{padding:0;overflow:hidden}
+.card img{width:100%;height:145px;object-fit:cover;background:#f4eee7}
+.card-body{padding:12px}
+.card h3{font-size:16px;margin:4px 0}
+.price{font-weight:900;color:var(--red)}
+.food-grid{grid-template-columns:repeat(4,1fr)}
+.section-head{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.panel{margin-top:15px}
+.panel h2,.panel h3{margin-top:0}
+label{display:block;font-size:13px;font-weight:800;margin:12px 0 6px}
+input,select,textarea{width:100%;border:1px solid #dfd3c6;border-radius:10px;padding:12px;background:#fff;color:var(--dark);outline:none}
+input:focus,select:focus,textarea:focus{border-color:var(--red)}
+textarea{min-height:75px;resize:vertical}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.choice-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+.choice{display:flex;align-items:center;gap:9px;border:1px solid var(--border);border-radius:11px;padding:11px;background:#fff;cursor:pointer}
+.choice input{width:auto;accent-color:var(--red)}
+.choice span{font-size:14px;font-weight:700}
+.qty{display:flex;align-items:center;gap:12px}
+.qty button{width:34px;height:34px;border:0;border-radius:9px;background:#fff0e9;color:var(--red);font-size:20px;font-weight:900}
+.qty b{min-width:20px;text-align:center}
+.summary{background:#fff7ef;border-radius:12px;padding:14px;margin-top:15px;line-height:1.8}
+.plan{cursor:pointer;border:2px solid var(--border);text-align:left}
+.plan.selected{border-color:var(--red);background:#fff7f2}
+.plan h3{margin:5px 0}
+.plan .amount{font-size:26px;color:var(--red);font-weight:900}
+.plan p{font-size:13px;color:var(--muted);line-height:1.5}
+.badge{display:inline-block;background:#e8f7ed;color:var(--green);font-size:11px;font-weight:900;padding:5px 8px;border-radius:20px}
+.rowline{display:flex;justify-content:space-between;gap:12px;padding:9px 0;border-bottom:1px solid var(--border)}
+.total{font-size:21px;font-weight:900;color:var(--red)}
+.cart-item{border:1px solid var(--border);border-radius:13px;padding:14px;margin:10px 0;background:#fff}
+.empty{text-align:center;padding:40px 15px;color:var(--muted)}
+.payment-box{background:#fff;border:1px dashed var(--red);border-radius:15px;padding:18px;text-align:center;margin:15px 0}
+.payment-box strong{font-size:21px;color:var(--red);display:block;margin:8px}
+.notice{background:#fff5dc;color:#73501c;border-radius:10px;padding:12px;font-size:13px;line-height:1.5}
+footer{text-align:center;padding:25px 15px;color:var(--muted);font-size:12px}
+.bottom-nav{display:none}
+.toast{position:fixed;bottom:95px;left:50%;transform:translateX(-50%);background:#241d18;color:white;padding:12px 18px;border-radius:10px;z-index:100;display:none;max-width:90%;font-size:14px;box-shadow:0 5px 20px #0002}
+@media(max-width:760px){
+ nav{display:none}
+ .hero{grid-template-columns:1fr;padding:25px 20px}
+ .cat-stage{min-height:205px;padding-top:54px}
+ .thinking-popup{font-size:12px;padding:7px 12px}
+ .cute-cat-svg{width:125px;height:125px}
+ .features{grid-template-columns:1fr}
+ .food-grid{grid-template-columns:repeat(2,1fr)}
+ .plans{grid-template-columns:1fr}
+ .topbar{padding:11px 15px}
+ .bottom-nav{display:flex;position:fixed;bottom:0;left:0;right:0;background:white;border-top:1px solid var(--border);z-index:30;justify-content:space-around;padding:8px 3px calc(8px + env(safe-area-inset-bottom))}
+ .bottom-nav button{border:0;background:transparent;color:#71675e;font-size:11px;font-weight:800;display:flex;flex-direction:column;align-items:center;gap:4px;padding:5px}
+ .bottom-nav button.active{color:var(--red)}
+ .bottom-nav span{font-size:19px}
+ main{padding:15px 12px}
+ .form-grid{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<header>
+ <div class="topbar">
+  <div class="logo">TIFO<small>GHAR JAISA KHANA</small></div>
+  <nav>
+   <button class="navbtn active" data-page="home" onclick="openPage('home')">Home</button>
+   <button class="navbtn" data-page="daily" onclick="openPage('daily')">Daily Tiffin</button>
+   <button class="navbtn" data-page="monthly" onclick="openPage('monthly')">Monthly Plans</button>
+   <button class="navbtn" data-page="track" onclick="openPage('track')">Track Order</button>
+  </nav>
+  <button class="cart-top" onclick="openPage('cart')">🛒 Cart <span id="cartCount">0</span></button>
+ </div>
+</header>
+
+<main>
+<section class="page active" id="home">
+ <div class="hero">
+  <div>
+   <div class="eyebrow">FRESH • HOMEMADE • DELICIOUS</div>
+   <h1>Ghar jaisa khana,<br>ab aapke ghar.</h1>
+   <p>Roz ka taaza aur swaadisht khana. Apna tiffin choose karein aur ghar baithe order karein.</p>
+   <button class="btn" onclick="openPage('daily')">Order Daily Tiffin →</button>
+   <button class="btn secondary" onclick="openPage('monthly')">Monthly Plans</button>
+  </div>
+
+  <!-- Cute Cat + Thinking Pop-up -->
+  <div class="cat-stage" aria-label="Cute cat thinking pop-up">
+   <div class="thinking-popup">ji apke pet ko meri yaad nhi ati</div>
+   <svg class="cute-cat-svg" viewBox="0 0 160 160" xmlns="http://www.w3.org/2000/svg">
+    <!-- Tail -->
+    <path d="M112 126 Q142 118 136 92 Q132 78 120 84" fill="none" stroke="#f4974c" stroke-width="9" stroke-linecap="round"/>
+    <!-- Body -->
+    <ellipse cx="80" cy="118" rx="34" ry="27" fill="#ffa95e"/>
+    <ellipse cx="80" cy="121" rx="20" ry="18" fill="#fff2e2"/>
+    <!-- Paws -->
+    <ellipse cx="62" cy="140" rx="10" ry="6" fill="#ffa95e"/>
+    <ellipse cx="98" cy="140" rx="10" ry="6" fill="#ffa95e"/>
+    <!-- Ears -->
+    <polygon points="46,66 39,34 69,50" fill="#ffa95e"/>
+    <polygon points="49,61 44,41 63,52" fill="#ff9eb5"/>
+    <polygon points="114,66 121,34 91,50" fill="#ffa95e"/>
+    <polygon points="111,61 116,41 97,52" fill="#ff9eb5"/>
+    <!-- Head -->
+    <ellipse cx="80" cy="74" rx="40" ry="33" fill="#ffa95e"/>
+    <!-- Forehead stripes -->
+    <path d="M80 42 L80 54 M71 44 L73 53 M89 44 L87 53" stroke="#e07d32" stroke-width="3" stroke-linecap="round"/>
+    <!-- Eyes -->
+    <circle cx="64" cy="73" r="8" fill="#211c18"/>
+    <circle cx="96" cy="73" r="8" fill="#211c18"/>
+    <circle cx="61.5" cy="70" r="3" fill="#ffffff"/>
+    <circle cx="93.5" cy="70" r="3" fill="#ffffff"/>
+    <!-- Rosy Cheeks -->
+    <ellipse cx="52" cy="83" rx="6.5" ry="4" fill="#ff8fa3" opacity="0.7"/>
+    <ellipse cx="108" cy="83" rx="6.5" ry="4" fill="#ff8fa3" opacity="0.7"/>
+    <!-- Nose & Mouth -->
+    <polygon points="76,79 84,79 80,84" fill="#ff6b8b"/>
+    <path d="M72 88 Q76 93 80 87 Q84 93 88 88" fill="none" stroke="#211c18" stroke-width="2.5" stroke-linecap="round"/>
+    <!-- Whiskers -->
+    <line x1="32" y1="74" x2="48" y2="77" stroke="#211c18" stroke-width="2" stroke-linecap="round"/>
+    <line x1="31" y1="83" x2="47" y2="83" stroke="#211c18" stroke-width="2" stroke-linecap="round"/>
+    <line x1="128" y1="74" x2="112" y2="77" stroke="#211c18" stroke-width="2" stroke-linecap="round"/>
+    <line x1="129" y1="83" x2="113" y2="83" stroke="#211c18" stroke-width="2" stroke-linecap="round"/>
+   </svg>
+  </div>
+ </div>
+
+ <h2 class="section-title">TIFO par aapko kya milega?</h2>
+ <div class="features">
+  <div class="feature"><strong>🍲 Ghar Jaisa Khana</strong><p>Fresh aur tasty homemade meals.</p></div>
+  <div class="feature"><strong>🛵 Easy Ordering</strong><p>Apne phone se aasani se order karein.</p></div>
+  <div class="feature"><strong>📦 Daily & Monthly</strong><p>Ek din ya poore mahine ka tiffin choose karein.</p></div>
+ </div>
+
+ <h2 class="section-title">Hamare Menu Mein</h2>
+ <div class="food-grid">
+  <div class="card"><img src="./images (3).jpeg" alt="Aloo Matar"><div class="card-body"><h3>Aloo Matar</h3><span class="muted">Fresh sabzi</span></div></div>
+  <div class="card"><img src="./images.jpeg" alt="Matar Paneer"><div class="card-body"><h3>Matar Paneer</h3><span class="muted">Special sabzi</span></div></div>
+  <div class="card"><img src="./images (2).jpeg" alt="Dal Tadka"><div class="card-body"><h3>Dal Tadka</h3><span class="muted">Homemade dal</span></div></div>
+  <div class="card"><img src="./images (1).jpeg" alt="Mix Veg"><div class="card-body"><h3>Mix Veg</h3><span class="muted">Fresh vegetables</span></div></div>
+ </div>
+ <div class="panel">
+  <h3>Daily Tiffin – ₹150</h3>
+  <p class="muted">2 sabzi, rice, boondi raita, salad, pickle aur aapki choice ki roti.</p>
+  <button class="btn" onclick="openPage('daily')">Order Now</button>
+ </div>
+</section>
+
+<section class="page" id="daily">
+ <div class="section-head"><h1>Daily Tiffin</h1><span class="badge">₹150 / Tiffin</span></div>
+ <p class="muted">Apni pasand ki exactly 2 sabzi select karein.</p>
+
+ <div class="panel">
+  <h3>1. Apni 2 Sabzi Choose Karein</h3>
+  <div class="choice-grid">
+   <label class="choice"><input type="checkbox" name="sabzi" value="Aloo Matar" onchange="updateDailyTotal()"><span>Aloo Matar</span></label>
+   <label class="choice"><input type="checkbox" name="sabzi" value="Matar Paneer" onchange="updateDailyTotal()"><span>Matar Paneer</span></label>
+   <label class="choice"><input type="checkbox" name="sabzi" value="Dal Tadka" onchange="updateDailyTotal()"><span>Dal Tadka</span></label>
+   <label class="choice"><input type="checkbox" name="sabzi" value="Mix Veg" onchange="updateDailyTotal()"><span>Mix Veg</span></label>
+  </div>
+  <div class="food-grid" style="margin-top:14px">
+   <div class="card"><img src="./images (3).jpeg" alt="Aloo Matar"></div>
+   <div class="card"><img src="./images.jpeg" alt="Matar Paneer"></div>
+   <div class="card"><img src="./images (2).jpeg" alt="Dal Tadka"></div>
+   <div class="card"><img src="./images (1).jpeg" alt="Mix Veg"></div>
+  </div>
+  <h3 style="margin-top:22px">2. Roti Choose Karein</h3>
+  <label class="choice"><input type="radio" name="roti" value="Sada Ghar Ki Roti (4 pieces)" checked onchange="updateDailyTotal()"><span>Sada Ghar Ki Roti – 4 pieces</span></label>
+  <label class="choice"><input type="radio" name="roti" value="Tandoori Roti (3 pieces)" onchange="updateDailyTotal()"><span>Tandoori Roti – 3 pieces</span></label>
+
+  <h3 style="margin-top:22px">3. Extra Items</h3>
+  <div class="rowline"><div><b>Butter Roti</b><div class="muted">₹15 per piece</div></div><div class="qty"><button onclick="changeQty('butter',-1)">−</button><b id="butterQty">0</b><button onclick="changeQty('butter',1)">+</button></div></div>
+  <div class="rowline"><div><b>Water Bottle</b><div class="muted">₹20 per bottle</div></div><div class="qty"><button onclick="changeQty('water',-1)">−</button><b id="waterQty">0</b><button onclick="changeQty('water',1)">+</button></div></div>
+
+  <div class="summary">
+   <div class="rowline"><span>Daily Tiffin</span><b>₹150</b></div>
+   <div class="rowline"><span>Butter Roti</span><b id="butterPrice">₹0</b></div>
+   <div class="rowline"><span>Water Bottle</span><b id="waterPrice">₹0</b></div>
+   <div class="rowline"><b>Total</b><b class="total" id="dailyTotal">₹150</b></div>
+  </div>
+ </div>
+
+ <div class="panel">
+  <h3>4. Delivery Details</h3>
+  <div class="form-grid">
+   <div><label>Your Name</label><input id="dailyName" placeholder="Enter your name"></div>
+   <div><label>Mobile Number</label><input id="dailyPhone" type="tel" maxlength="10" placeholder="10 digit mobile number"></div>
+  </div>
+  <label>Delivery Address</label><textarea id="dailyAddress" placeholder="House number, area, landmark..."></textarea>
+  <label>Meal Timing</label>
+  <select id="dailyMeal"><option value="Lunch">Lunch</option><option value="Dinner">Dinner</option></select>
+  <p class="muted">Rice, boondi raita, salad aur pickle tiffin mein included hain.</p>
+  <button class="btn" style="width:100%" onclick="addDailyToCart()">Add Daily Tiffin to Cart</button>
+ </div>
+</section>
+
+<section class="page" id="monthly">
+ <h1>Monthly Tiffin Plans</h1>
+ <p class="muted">30 days ke liye apna monthly plan choose karein.</p>
+ <div class="plans">
+  <button class="plan selected" id="classicPlan" onclick="choosePlan('Classic')">
+   <span class="badge">CLASSIC</span><h3>Classic Plan</h3><div class="amount">₹12,000</div><p>₹400 per day<br>30 days tiffin service<br>Regular homemade meals</p>
+  </button>
+  <button class="plan" id="premiumPlan" onclick="choosePlan('Premium')">
+   <span class="badge">PREMIUM</span><h3>Premium Plan</h3><div class="amount">₹13,800</div><p>₹460 per day<br>30 days tiffin service<br>4 butter rotis daily</p>
+  </button>
+ </div>
+ <div class="panel">
+  <h3 id="selectedPlanTitle">Classic Plan – ₹12,000</h3>
+  <div class="form-grid">
+   <div><label>Your Name</label><input id="monthlyName" placeholder="Enter your name"></div>
+   <div><label>Mobile Number</label><input id="monthlyPhone" type="tel" maxlength="10" placeholder="10 digit mobile number"></div>
+  </div>
+  <label>Full Delivery Address</label><textarea id="monthlyAddress" placeholder="House number, area, landmark..."></textarea>
+  <div class="form-grid">
+   <div><label>Plan Start Date</label><input id="monthlyStart" type="date"></div>
+   <div><label>Meal Timing</label><select id="monthlyMeal"><option>Lunch</option><option>Dinner</option><option>All Meals</option></select></div>
+  </div>
+  <div class="notice" style="margin:15px 0">Premium plan mein daily 4 butter rotis included hain. Dinner delivery timing: 10 PM.</div>
+  <button class="btn" style="width:100%" onclick="addMonthlyToCart()">Add Monthly Plan to Cart</button>
+ </div>
+</section>
+
+<section class="page" id="cart">
+ <h1>Your Cart 🛒</h1>
+ <div id="cartContent"></div>
+</section>
+
+<section class="page" id="payment">
+ <h1>Payment</h1>
+ <div id="paymentContent"></div>
+</section>
+
+<section class="page" id="track">
+ <h1>Track Your Order</h1>
+ <div class="panel">
+  <p class="muted">Apna Order ID ya registered mobile number enter karein. Orders isi browser/device par save hote hain.</p>
+  <label>Order ID / Mobile Number</label>
+  <input id="trackInput" placeholder="Example: TIFO123456">
+  <button class="btn" style="width:100%;margin-top:12px" onclick="trackOrder()">Find My Order</button>
+  <div id="trackResult"></div>
+ </div>
+</section>
+</main>
+
+<footer>
+ <b>TIFO – Ghar Jaisa Khana</b><br>
+ Fresh homemade food, made with care.<br><br>
+ Support: <a href="https://wa.me/917599041129" style="color:#ed3e13">WhatsApp 7599044129</a>
+</footer>
+
+<div class="bottom-nav">
+ <button class="active" data-page="home" onclick="openPage('home')"><span>⌂</span>Home</button>
+ <button data-page="daily" onclick="openPage('daily')"><span>🍱</span>Daily</button>
+ <button data-page="monthly" onclick="openPage('monthly')"><span>📅</span>Monthly</button>
+ <button data-page="cart" onclick="openPage('cart')"><span>🛒</span>Cart</button>
+ <button data-page="track" onclick="openPage('track')"><span>📦</span>Track</button>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
 "use strict";
 
 const WHATSAPP_NUMBER = "917599041129";
 const UPI_ID = "9458834146@ybl";
-
 let cart = JSON.parse(localStorage.getItem("tifoCart") || "[]");
 let orders = JSON.parse(localStorage.getItem("tifoOrders") || "[]");
 let butterQty = 0;
 let waterQty = 0;
 let selectedPlan = "Classic";
+let activeOrderId = null;
 
-function toast(message) {
-  const el = document.getElementById("toast");
-  if (!el) return;
-  el.textContent = message;
-  el.style.display = "block";
-  clearTimeout(window.toastTimer);
-  window.toastTimer = setTimeout(() => {
-    el.style.display = "none";
-  }, 2600);
+function toast(message){
+ const el=document.getElementById("toast");
+ el.textContent=message;
+ el.style.display="block";
+ clearTimeout(window.toastTimer);
+ window.toastTimer=setTimeout(()=>el.style.display="none",2600);
 }
 
-function openPage(page) {
-  document.querySelectorAll(".page").forEach(p => p.classList.remove("active"));
-
-  const target = document.getElementById(page);
-  if (!target) {
-    toast("Page nahi mili.");
-    return;
-  }
-
-  target.classList.add("active");
-
-  document.querySelectorAll("[data-page]").forEach(btn => {
-    btn.classList.toggle("active", btn.dataset.page === page);
-  });
-
-  if (page === "cart") renderCart();
-  if (page === "payment") renderPayment();
-
-  window.scrollTo({ top: 0, behavior: "smooth" });
+function openPage(page){
+ document.querySelectorAll(".page").forEach(p=>p.classList.remove("active"));
+ const target=document.getElementById(page);
+ if(!target){toast("Page nahi mili.");return;}
+ target.classList.add("active");
+ document.querySelectorAll("[data-page]").forEach(b=>{
+  b.classList.toggle("active",b.dataset.page===page);
+ });
+ if(page==="cart")renderCart();
+ if(page==="payment")renderPayment();
+ window.scrollTo({top:0,behavior:"smooth"});
 }
 
-function saveCart() {
-  localStorage.setItem("tifoCart", JSON.stringify(cart));
-  updateCartCount();
+function saveCart(){
+ localStorage.setItem("tifoCart",JSON.stringify(cart));
+ updateCartCount();
 }
 
-function saveOrders() {
-  localStorage.setItem("tifoOrders", JSON.stringify(orders));
+function saveOrders(){
+ localStorage.setItem("tifoOrders",JSON.stringify(orders));
 }
 
-function updateCartCount() {
-  const el = document.getElementById("cartCount");
-  if (el) el.textContent = cart.length;
+function updateCartCount(){
+ document.getElementById("cartCount").textContent=cart.length;
 }
 
-function changeQty(type, amount) {
-  if (type === "butter") {
-    butterQty = Math.max(0, butterQty + amount);
-    document.getElementById("butterQty").textContent = butterQty;
-  }
-
-  if (type === "water") {
-    waterQty = Math.max(0, waterQty + amount);
-    document.getElementById("waterQty").textContent = waterQty;
-  }
-
-  updateDailyTotal();
+function getPhone(id){
+ return document.getElementById(id).value.trim().replace(/\s+/g,"");
 }
 
-function updateDailyTotal() {
-  const butterPrice = butterQty * 15;
-  const waterPrice = waterQty * 20;
-  const total = 150 + butterPrice + waterPrice;
-
-  document.getElementById("butterPrice").textContent = "₹" + butterPrice;
-  document.getElementById("waterPrice").textContent = "₹" + waterPrice;
-  document.getElementById("dailyTotal").textContent = "₹" + total;
-
-  const selected = document.querySelectorAll('input[name="sabzi"]:checked');
-  document.querySelectorAll('input[name="sabzi"]').forEach(input => {
-    input.disabled = selected.length >= 2 && !input.checked;
-  });
+function validDetails(name,phone,address){
+ if(!name){toast("Please apna naam enter karein.");return false;}
+ if(!/^[6-9]\d{9}$/.test(phone)){toast("Sahi 10 digit mobile number enter karein.");return false;}
+ if(address.length<8){toast("Please poora delivery address enter karein.");return false;}
+ return true;
 }
 
-function addDailyToCart() {
-  const sabzis = [...document.querySelectorAll('input[name="sabzi"]:checked')]
-    .map(input => input.value);
-
-  if (sabzis.length !== 2) {
-    toast("Please exactly 2 sabzi choose karein.");
-    return;
-  }
-
-  const name = document.getElementById("dailyName").value.trim();
-  const phone = document.getElementById("dailyPhone").value.trim();
-  const address = document.getElementById("dailyAddress").value.trim();
-  const meal = document.getElementById("dailyMeal").value;
-  const roti = document.querySelector('input[name="roti"]:checked').value;
-
-  if (!name || !/^[0-9]{10}$/.test(phone) || !address) {
-    toast("Name, 10 digit mobile aur address bharein.");
-    return;
-  }
-
-  const total = 150 + butterQty * 15 + waterQty * 20;
-
-  cart.push({
-    type: "Daily Tiffin",
-    name,
-    phone,
-    address,
-    meal,
-    sabzis,
-    roti,
-    butterQty,
-    waterQty,
-    price: total
-  });
-
-  saveCart();
-  toast("Daily Tiffin cart mein add ho gaya!");
-  openPage("cart");
+function selectedSabzis(){
+ return [...document.querySelectorAll('input[name="sabzi"]:checked')].map(x=>x.value);
 }
 
-function choosePlan(plan) {
-  selectedPlan = plan;
-
-  document.getElementById("classicPlan").classList.toggle(
-    "selected", plan === "Classic"
-  );
-
-  document.getElementById("premiumPlan").classList.toggle(
-    "selected", plan === "Premium"
-  );
-
-  const price = plan === "Classic" ? 12000 : 13800;
-
-  document.getElementById("selectedPlanTitle").textContent =
-    plan + " Plan – ₹" + price;
+function updateDailyTotal(){
+ const butter=butterQty*15;
+ const water=waterQty*20;
+ document.getElementById("butterQty").textContent=butterQty;
+ document.getElementById("waterQty").textContent=waterQty;
+ document.getElementById("butterPrice").textContent="₹"+butter;
+ document.getElementById("waterPrice").textContent="₹"+water;
+ document.getElementById("dailyTotal").textContent="₹"+(150+butter+water);
 }
 
-function addMonthlyToCart() {
-  const name = document.getElementById("monthlyName").value.trim();
-  const phone = document.getElementById("monthlyPhone").value.trim();
-  const address = document.getElementById("monthlyAddress").value.trim();
-  const start = document.getElementById("monthlyStart").value;
-  const meal = document.getElementById("monthlyMeal").value;
-
-  if (!name || !/^[0-9]{10}$/.test(phone) || !address || !start) {
-    toast("Saari details sahi se bharein.");
-    return;
-  }
-
-  const price = selectedPlan === "Classic" ? 12000 : 13800;
-
-  cart.push({
-    type: selectedPlan + " Monthly Plan",
-    name,
-    phone,
-    address,
-    start,
-    meal,
-    price
-  });
-
-  saveCart();
-  toast("Monthly Plan cart mein add ho gaya!");
-  openPage("cart");
+function changeQty(type,amount){
+ if(type==="butter")butterQty=Math.max(0,Math.min(20,butterQty+amount));
+ if(type==="water")waterQty=Math.max(0,Math.min(20,waterQty+amount));
+ updateDailyTotal();
 }
 
-function removeCartItem(index) {
-  cart.splice(index, 1);
-  saveCart();
-  renderCart();
+function addDailyToCart(){
+ const sabzis=selectedSabzis();
+ if(sabzis.length!==2){toast("Please exactly 2 sabzi select karein.");return;}
+ const name=document.getElementById("dailyName").value.trim();
+ const phone=getPhone("dailyPhone");
+ const address=document.getElementById("dailyAddress").value.trim();
+ const meal=document.getElementById("dailyMeal").value;
+ if(!validDetails(name,phone,address))return;
+ const roti=document.querySelector('input[name="roti"]:checked').value;
+ const total=150+(butterQty*15)+(waterQty*20);
+ cart.push({
+  id:Date.now(),type:"Daily Tiffin",name,phone,address,meal,
+  sabzis,roti,butterQty,waterQty,total
+ });
+ saveCart();
+ toast("Daily Tiffin cart mein add ho gaya!");
+ openPage("cart");
 }
 
-function getCartTotal() {
-  return cart.reduce((sum, item) => sum + Number(item.price || 0), 0);
+function choosePlan(plan){
+ selectedPlan=plan;
+ document.getElementById("classicPlan").classList.toggle("selected",plan==="Classic");
+ document.getElementById("premiumPlan").classList.toggle("selected",plan==="Premium");
+ document.getElementById("selectedPlanTitle").textContent=plan+" Plan – ₹"+(plan==="Classic"?"12,000":"13,800");
+ document.getElementById("monthly").scrollIntoView({behavior:"smooth"});
 }
 
-function renderCart() {
-  const container = document.getElementById("cartContent");
-
-  if (!cart.length) {
-    container.innerHTML = `
-      <div class="empty">
-        <h2>🛒 Your cart is empty</h2>
-        <p>Apna pasandida tiffin choose karein.</p>
-        <button class="btn" onclick="openPage('daily')">Order Daily Tiffin</button>
-      </div>`;
-    return;
-  }
-
-  container.innerHTML = cart.map((item, index) => `
-    <div class="cart-item">
-      <h3>${escapeHTML(item.type)}</h3>
-      <p class="muted">Name: ${escapeHTML(item.name)}</p>
-      <p class="muted">Mobile: ${escapeHTML(item.phone)}</p>
-      ${item.sabzis ? `<p>Sabzi: ${item.sabzis.map(escapeHTML).join(", ")}</p>` : ""}
-      ${item.roti ? `<p>Roti: ${escapeHTML(item.roti)}</p>` : ""}
-      ${item.butterQty ? `<p>Butter Roti: ${item.butterQty}</p>` : ""}
-      ${item.waterQty ? `<p>Water Bottle: ${item.waterQty}</p>` : ""}
-      ${item.start ? `<p>Start Date: ${escapeHTML(item.start)}</p>` : ""}
-      <div class="rowline">
-        <b>₹${item.price}</b>
-        <button class="btn light" onclick="removeCartItem(${index})">Remove</button>
-      </div>
-    </div>
-  `).join("") + `
-    <div class="panel">
-      <div class="rowline">
-        <b>Grand Total</b>
-        <b class="total">₹${getCartTotal()}</b>
-      </div>
-      <button class="btn" style="width:100%;margin-top:12px"
-        onclick="openPage('payment')">Proceed to Payment</button>
-    </div>`;
+function addMonthlyToCart(){
+ const name=document.getElementById("monthlyName").value.trim();
+ const phone=getPhone("monthlyPhone");
+ const address=document.getElementById("monthlyAddress").value.trim();
+ const start=document.getElementById("monthlyStart").value;
+ const meal=document.getElementById("monthlyMeal").value;
+ if(!validDetails(name,phone,address))return;
+ if(!start){toast("Please plan start date choose karein.");return;}
+ const total=selectedPlan==="Classic"?12000:13800;
+ cart.push({
+  id:Date.now(),type:"Monthly "+selectedPlan+" Plan",name,phone,address,
+  start,meal,total,plan:selectedPlan
+ });
+ saveCart();
+ toast("Monthly plan cart mein add ho gaya!");
+ openPage("cart");
 }
 
-function renderPayment() {
-  const container = document.getElementById("paymentContent");
+function money(n){return "₹"+Number(n).toLocaleString("en-IN");}
 
-  if (!cart.length) {
-    container.innerHTML = `
-      <div class="empty">
-        <h3>Your cart is empty.</h3>
-        <button class="btn" onclick="openPage('daily')">Choose Tiffin</button>
-      </div>`;
-    return;
-  }
-
-  const total = getCartTotal();
-
-  container.innerHTML = `
-    <div class="panel">
-      <h3>Order Summary</h3>
-      ${cart.map(item => `
-        <div class="rowline">
-          <span>${escapeHTML(item.type)}</span>
-          <b>₹${item.price}</b>
-        </div>`).join("")}
-      <div class="rowline">
-        <b>Total Payable</b>
-        <b class="total">₹${total}</b>
-      </div>
-    </div>
-
-    <div class="payment-box">
-      <h3>Pay Using UPI</h3>
-      <p>UPI ID</p>
-      <strong id="upiText">${UPI_ID}</strong>
-      <button class="btn secondary" onclick="copyUPI()">Copy UPI ID</button>
-      <p class="muted">Apne UPI app mein ID par ₹${total} payment karein.</p>
-      <a class="btn" style="display:inline-block;text-decoration:none;margin-top:8px"
-        href="upi://pay?pa=${UPI_ID}&pn=TIFO&am=${total}&cu=INR">
-        Open UPI App
-      </a>
-    </div>
-
-    <div class="panel">
-      <label>Payment UTR / Transaction ID</label>
-      <input id="paymentUTR" placeholder="Payment ke baad UTR enter karein">
-      <div class="notice" style="margin:12px 0">
-        Payment ka UTR submit karne ke baad verification pending rahega.
-        Order WhatsApp par details ke saath bheja jayega.
-      </div>
-      <button class="btn green" style="width:100%" onclick="placeOrder()">
-        Submit Order
-      </button>
-    </div>`;
+function escapeHTML(value){
+ return String(value??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 }
 
-function copyUPI() {
-  if (navigator.clipboard && navigator.clipboard.writeText) {
-    navigator.clipboard.writeText(UPI_ID)
-      .then(() => toast("UPI ID copied!"))
-      .catch(() => toast("UPI ID: " + UPI_ID));
-  } else {
-    toast("UPI ID: " + UPI_ID);
-  }
+function removeItem(index){
+ cart.splice(index,1);
+ saveCart();
+ renderCart();
+ toast("Item cart se hata diya gaya.");
 }
 
-function placeOrder() {
-  if (!cart.length) {
-    toast("Cart empty hai.");
-    return;
-  }
-
-  const utr = document.getElementById("paymentUTR").value.trim();
-
-  if (!utr) {
-    toast("Payment UTR enter karein.");
-    return;
-  }
-
-  const orderId = "TIFO" + Date.now().toString().slice(-8);
-  const total = getCartTotal();
-
-  const order = {
-    id: orderId,
-    items: [...cart],
-    total,
-    utr,
-    status: "Payment Verification Pending",
-    date: new Date().toLocaleString("en-IN")
-  };
-
-  orders.push(order);
-  saveOrders();
-
-  const message = [
-    "TIFO NEW ORDER",
-    "Order ID: " + orderId,
-    "Total: ₹" + total,
-    "UTR: " + utr,
-    "",
-    ...cart.map(item =>
-      item.type + " | " + item.name + " | ₹" + item.price +
-      " | Phone: " + item.phone +
-      " | Address: " + item.address
-    )
-  ].join("\n");
-
-  cart = [];
-  saveCart();
-
-  document.getElementById("paymentContent").innerHTML = `
-    <div class="panel">
-      <h2>Order Submitted!</h2>
-      <p>Your Order ID:</p>
-      <h2 class="price">${orderId}</h2>
-      <p>Payment verification pending hai. WhatsApp par order details bhejein.</p>
-      <button class="btn green" style="width:100%"
-        onclick="window.open('https://wa.me/${WHATSAPP_NUMBER}?text='+encodeURIComponent(${JSON.stringify(message)}),'_blank')">
-        Send Order on WhatsApp
-      </button>
-      <button class="btn secondary" style="width:100%;margin-top:10px"
-        onclick="openPage('track')">Track Order</button>
-    </div>`;
-
-  toast("Order details save ho gayi!");
+function renderCart(){
+ const box=document.getElementById("cartContent");
+ if(!cart.length){
+  box.innerHTML='<div class="empty"><div style="font-size:45px">🛒</div><h3>Your cart is empty</h3><p>Apna favourite tiffin add karein.</p><button class="btn" onclick="openPage(\'daily\')">Explore Daily Tiffin</button></div>';
+  return;
+ }
+ let total=0;
+ let html="";
+ cart.forEach((item,index)=>{
+  total+=Number(item.total);
+  let details=item.type==="Daily Tiffin"
+   ?`<p class="muted">Sabzi: ${item.sabzis.map(escapeHTML).join(", ")}<br>Roti: ${escapeHTML(item.roti)}<br>Butter roti: ${item.butterQty} | Water: ${item.waterQty} | Meal: ${escapeHTML(item.meal)}</p>`
+   :`<p class="muted">Start Date: ${escapeHTML(item.start)} | Meal: ${escapeHTML(item.meal)}</p>`;
+  html+=`<div class="cart-item">
+   <div style="display:flex;justify-content:space-between;align-items:center;gap:10px">
+    <b>${escapeHTML(item.type)}</b>
+    <span class="price">${money(item.total)}</span>
+   </div>
+   ${details}
+   <div class="muted">Customer: ${escapeHTML(item.name)} (${escapeHTML(item.phone)})<br>Address: ${escapeHTML(item.address)}</div>
+   <button class="btn light" style="margin-top:10px;padding:8px 12px;font-size:12px" onclick="removeItem(${index})">Remove</button>
+  </div>`;
+ });
+ html+=`<div class="panel">
+  <div class="rowline"><b>Grand Total</b><b class="total">${money(total)}</b></div>
+  <button class="btn green" style="width:100%;margin-top:14px" onclick="proceedToPayment()">Proceed to Payment →</button>
+ </div>`;
+ box.innerHTML=html;
 }
 
-function trackOrder() {
-  const search = document.getElementById("trackInput").value.trim();
-  const result = document.getElementById("trackResult");
-
-  if (!search) {
-    toast("Order ID ya mobile number enter karein.");
-    return;
-  }
-
-  const order = orders.find(o =>
-    o.id.toLowerCase() === search.toLowerCase() ||
-    o.items.some(item => item.phone === search)
-  );
-
-  if (!order) {
-    result.innerHTML = `
-      <div class="notice" style="margin-top:15px">
-        Is browser mein order nahi mila. Order ID ya registered mobile number check karein.
-      </div>`;
-    return;
-  }
-
-  result.innerHTML = `
-    <div class="panel">
-      <h3>Order Found</h3>
-      <p><b>Order ID:</b> ${escapeHTML(order.id)}</p>
-      <p><b>Date:</b> ${escapeHTML(order.date)}</p>
-      <p><b>Total:</b> ₹${order.total}</p>
-      <p><b>Status:</b> ${escapeHTML(order.status)}</p>
-      <p class="muted">Payment UTR: ${escapeHTML(order.utr)}</p>
-    </div>`;
+function proceedToPayment(){
+ if(!cart.length){toast("Cart khali hai.");return;}
+ const total=cart.reduce((s,i)=>s+Number(i.total),0);
+ const first=cart[0];
+ const orderId="TIFO"+String(Date.now()).slice(-6);
+ activeOrderId=orderId;
+ const newOrder={
+  orderId,
+  createdAt:new Date().toLocaleString("en-IN"),
+  name:first.name,
+  phone:first.phone,
+  address:first.address,
+  items:[...cart],
+  total,
+  status:"Pending Payment Confirmation"
+ };
+ orders.unshift(newOrder);
+ saveOrders();
+ openPage("payment");
 }
 
-function escapeHTML(value) {
-  return String(value ?? "").replace(/[&<>"']/g, char => ({
-    "&": "&amp;",
-    "<": "&lt;",
-    ">": "&gt;",
-    '"': "&quot;",
-    "'": "&#39;"
-  })[char]);
+function renderPayment(){
+ const box=document.getElementById("paymentContent");
+ const order=orders.find(o=>o.orderId===activeOrderId) || orders[0];
+ if(!order){
+  box.innerHTML='<div class="panel"><p class="muted">Koi active order nahi mila.</p><button class="btn" onclick="openPage(\'daily\')">Order Now</button></div>';
+  return;
+ }
+ const upiLink=`upi://pay?pa=${encodeURIComponent(UPI_ID)}&pn=${encodeURIComponent("TIFO Ghar Jaisa Khana")}&am=${order.total}&cu=INR&tn=${encodeURIComponent(order.orderId)}`;
+ const waText=encodeURIComponent(`Namaste TIFO, maine Order ID ${order.orderId} ke liye ${money(order.total)} ka payment kiya hai.\nNaam: ${order.name}\nPhone: ${order.phone}\nAddress: ${order.address}`);
+ box.innerHTML=`<div class="panel">
+  <div class="rowline"><span>Order ID</span><b>${escapeHTML(order.orderId)}</b></div>
+  <div class="rowline"><span>Customer</span><b>${escapeHTML(order.name)} (${escapeHTML(order.phone)})</b></div>
+  <div class="rowline"><span>Amount to Pay</span><b class="total">${money(order.total)}</b></div>
+  <div class="payment-box">
+   <span class="muted">UPI ID se pay karein:</span>
+   <strong>${escapeHTML(UPI_ID)}</strong>
+   <a class="btn" href="${upiLink}" style="display:inline-block;text-decoration:none;margin-top:8px">Pay via UPI App</a>
+  </div>
+  <div class="notice">Payment karne ke baad WhatsApp par screenshot ya confirmation bhejein taaki order jaldi confirm ho sake.</div>
+  <div style="display:grid;gap:10px;margin-top:14px">
+   <a class="btn green" href="https://wa.me/${WHATSAPP_NUMBER}?text=${waText}" target="_blank" rel="noopener" style="text-align:center;text-decoration:none" onclick="confirmOrderPlaced('${escapeHTML(order.orderId)}')">Send Payment Proof on WhatsApp</a>
+   <button class="btn dark" onclick="confirmOrderPlaced('${escapeHTML(order.orderId)}')">I Have Paid – Save Order</button>
+  </div>
+ </div>`;
 }
 
-// Page load par cart count aur totals set karein
-document.addEventListener("DOMContentLoaded", () => {
-  updateCartCount();
-  updateDailyTotal();
+function confirmOrderPlaced(orderId){
+ const ord=orders.find(o=>o.orderId===orderId);
+ if(ord)ord.status="Order Placed (Payment Sent)";
+ saveOrders();
+ cart=[];
+ saveCart();
+ toast("Order "+orderId+" save ho gaya! Track section mein check karein.");
+}
 
-  // Sabzi selection ko maximum 2 tak limit karein
-  document.querySelectorAll('input[name="sabzi"]').forEach(input => {
-    input.addEventListener("change", updateDailyTotal);
-  });
-});
+function trackOrder(){
+ const query=document.getElementById("trackInput").value.trim().toLowerCase();
+ const res=document.getElementById("trackResult");
+ if(!query){toast("Order ID ya mobile number enter karein.");return;}
+ const matches=orders.filter(o=>
+  o.orderId.toLowerCase().includes(query) || String(o.phone).toLowerCase().includes(query)
+ );
+ if(!matches.length){
+  res.innerHTML='<div class="notice" style="margin-top:14px">Is ID ya number se koi order nahi mila.</div>';
+  return;
+ }
+ res.innerHTML=matches.map(o=>`<div class="cart-item" style="margin-top:14px">
+  <div style="display:flex;justify-content:space-between;gap:10px">
+   <b>Order #${escapeHTML(o.orderId)}</b>
+   <span class="badge">${escapeHTML(o.status)}</span>
+  </div>
+  <p class="muted">Date: ${escapeHTML(o.createdAt)}<br>Customer: ${escapeHTML(o.name)} (${escapeHTML(o.phone)})<br>Address: ${escapeHTML(o.address)}</p>
+  <div><b>Total Paid/Due:</b> <span class="price">${money(o.total)}</span></div>
+ </div>`).join("");
+}
+
+updateCartCount();
+updateDailyTotal();
+</script>
+</body>
+</html>
