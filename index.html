@@ -505,8 +505,8 @@ footer{text-align:center;padding:25px 15px;color:var(--muted);font-size:12px}
 <script>
 
 let tifoInitialLocation=null;
-function showGpsWelcomePopup(){const p=document.getElementById("gpsWelcomePopup");if(p&&!sessionStorage.getItem("tifoGpsPromptDismissed"))p.style.display="flex";}
-function closeGpsWelcomePopup(){const p=document.getElementById("gpsWelcomePopup");if(p)p.style.display="none";sessionStorage.setItem("tifoGpsPromptDismissed","1");}
+function showGpsWelcomePopup(){const p=document.getElementById("gpsWelcomePopup");if(p&&!sessionStorage.getItem("tifoGpsPromptDismissed")){p.style.display="flex";p.style.zIndex="2147483647";}else{showSendAnythingPopup();}}
+function closeGpsWelcomePopup(){const p=document.getElementById("gpsWelcomePopup");if(p)p.style.display="none";sessionStorage.setItem("tifoGpsPromptDismissed","1");showSendAnythingPopup();}
 function requestWelcomeLocation(){
  const status=document.getElementById("gpsWelcomeStatus");
  if(!navigator.geolocation){if(status)status.textContent="Is browser mein GPS available nahi hai.";return;}
@@ -527,7 +527,8 @@ function showSendAnythingPopup(){
  const popup=document.getElementById("sendAnythingPopup");
  if(popup){popup.style.setProperty("display","flex","important");popup.style.setProperty("z-index","2147483645","important");}
 }
-if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",showSendAnythingPopup);}else{showSendAnythingPopup();}
+// Send Anything popup is deliberately shown only after the GPS popup is handled.
+// This prevents its full-screen overlay from covering the GPS Allow button.
 
 function closeSendAnythingPopup(){
  const popup=document.getElementById("sendAnythingPopup");
