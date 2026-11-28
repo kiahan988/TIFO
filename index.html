@@ -503,6 +503,27 @@ footer{text-align:center;padding:25px 15px;color:var(--muted);font-size:12px}
 </div>
 <div class="toast" id="toast"></div>
 
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
+<script>
+const tifoFirebaseConfig = {
+ apiKey: "AIzaSyBtYjiDSJjAEwHF8nxhWn4pZELp37PNG1I",
+ authDomain: "tifo-cf712.firebaseapp.com",
+ projectId: "tifo-cf712",
+ storageBucket: "tifo-cf712.firebasestorage.app",
+ messagingSenderId: "299559256336",
+ appId: "1:299559256336:web:cb267b927dcd4090e76595",
+ measurementId: "G-SGSJ7VFQKH"
+};
+let tifoDb = null;
+try {
+ if (!firebase.apps.length) firebase.initializeApp(tifoFirebaseConfig);
+ tifoDb = firebase.firestore();
+} catch (firebaseInitError) {
+ console.error("TIFO Firebase initialization failed:", firebaseInitError);
+}
+</script>
+
 <script>
 
 let tifoInitialLocation=null;
@@ -595,6 +616,28 @@ function saveCart(){
 function saveOrders(){
  localStorage.setItem("tifoOrders",JSON.stringify(orders));
 }
+
+async function syncOrderToFirebase(order){
+ if(!tifoDb){toast("Firebase connect nahi hua. Order is device par save hai.");return false;}
+ try{
+  const safeOrder={...order};
+  safeOrder.items=(order.items||[]).map(item=>{
+   const safeItem={...item};
+   delete safeItem.parcelPhoto;
+   return safeItem;
+  });
+  delete safeOrder.paymentProof;
+  safeOrder.source="TIFO Website";
+  safeOrder.createdAtISO=new Date().toISOString();
+  await tifoDb.collection("orders").doc(String(order.orderId)).set(safeOrder,{merge:true});
+  return true;
+ }catch(error){
+  console.error("Firebase order sync failed:",error);
+  toast("Order phone mein save hua, lekin Firebase sync nahi hua. Admin ko WhatsApp par bhejein.");
+  return false;
+ }
+}
+
 
 function updateCartCount(){
  document.getElementById("cartCount").textContent=cart.length;
@@ -1041,6 +1084,7 @@ function proceedToPayment(){
  };
  orders.unshift(newOrder);
  saveOrders();
+ syncOrderToFirebase(newOrder);
  openPage("payment");
 }
 
