@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#171b18">
+<title>TIFO Admin Dashboard</title>
+<style>
+:root{--bg:#f5f6f4;--panel:#fff;--ink:#202620;--muted:#778078;--line:#e8ece7;--green:#16834b;--green2:#e9f6ee;--orange:#ed5a2a;--dark:#171d19;--shadow:0 8px 28px rgba(23,35,27,.06)}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif}button,input,select{font:inherit}button{cursor:pointer}.app{min-height:100vh;display:flex}.sidebar{width:250px;background:var(--dark);color:#fff;padding:24px 16px;display:flex;flex-direction:column;position:fixed;inset:0 auto 0 0;z-index:5}.brand{display:flex;align-items:center;gap:12px;padding:4px 10px 28px}.brandmark{width:42px;height:42px;border-radius:14px;background:var(--orange);display:grid;place-items:center;font-weight:900;font-size:24px}.brand strong{font-size:20px;letter-spacing:.5px}.brand small{display:block;color:#aab5ac;font-size:10px;letter-spacing:2px;margin-top:2px}.nav-label{color:#849087;font-size:10px;font-weight:800;letter-spacing:1.5px;padding:12px 12px 8px}.nav{display:grid;gap:5px}.nav button{border:0;background:transparent;color:#c3ccc5;text-align:left;padding:12px;border-radius:10px;display:flex;gap:12px;align-items:center;font-size:13px;font-weight:650}.nav button:hover,.nav button.active{background:#29352d;color:#fff}.nav button.active{box-shadow:inset 3px 0 var(--orange)}.nav .ico{width:20px;text-align:center;font-size:16px}.side-bottom{margin-top:auto;border-top:1px solid #344038;padding:18px 10px 4px;color:#aab5ac;font-size:11px;line-height:1.6}.main{margin-left:250px;width:calc(100% - 250px);padding:26px 32px 48px}.topbar{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:26px}.crumb{font-size:12px;color:var(--muted)}h1{font-size:25px;margin:5px 0 0;letter-spacing:-.6px}.top-right{display:flex;align-items:center;gap:12px}.preview{background:#fff4e9;color:#a94a1e;border:1px solid #ffdec5;border-radius:30px;padding:8px 12px;font-size:11px;font-weight:800}.avatar{width:38px;height:38px;border-radius:50%;background:var(--green2);color:var(--green);display:grid;place-items:center;font-weight:800}.notice{background:#fff8ed;border:1px solid #f4dfbd;border-radius:12px;padding:13px 15px;color:#78552b;font-size:12px;line-height:1.55;margin-bottom:22px}.notice strong{color:#573a17}.page{display:none}.page.active{display:block}.welcome{display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:20px}.welcome h2{margin:0;font-size:20px}.welcome p{margin:6px 0 0;color:var(--muted);font-size:12px}.date{color:var(--muted);font-size:12px}.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:20px}.stat{background:var(--panel);border:1px solid var(--line);border-radius:15px;padding:17px;box-shadow:var(--shadow)}.stat-top{display:flex;justify-content:space-between;align-items:center;color:var(--muted);font-size:11px;font-weight:700}.stat-icon{width:32px;height:32px;border-radius:10px;background:var(--green2);display:grid;place-items:center;font-size:16px}.stat b{display:block;font-size:27px;margin:12px 0 3px;letter-spacing:-1px}.stat small{font-size:10px;color:var(--muted)}.grid2{display:grid;grid-template-columns:1.45fr 1fr;gap:15px}.panel{background:#fff;border:1px solid var(--line);border-radius:15px;padding:18px;box-shadow:var(--shadow);margin-bottom:15px}.panel-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:15px}.panel h3{margin:0;font-size:14px}.sub{font-size:11px;color:var(--muted);margin-top:4px}.pill{border-radius:30px;background:#f1f4f1;color:#657168;padding:6px 9px;font-size:10px;font-weight:800}.empty{padding:35px 12px;text-align:center;color:var(--muted)}.empty .empty-icon{font-size:27px;margin-bottom:8px}.empty b{display:block;color:#48534b;font-size:13px;margin-bottom:5px}.empty p{font-size:11px;margin:0;line-height:1.5}.quick{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}.quick button{border:1px solid var(--line);background:#fff;border-radius:12px;padding:15px 12px;text-align:left;color:var(--ink)}.quick button:hover{border-color:#9ac9aa;background:#fbfffc}.quick span{font-size:20px;display:block;margin-bottom:9px}.quick b{font-size:12px;display:block}.quick small{color:var(--muted);font-size:10px}.toolbar{display:flex;gap:10px;flex-wrap:wrap;margin:16px 0}.toolbar input,.toolbar select,.field input,.field select{border:1px solid var(--line);border-radius:9px;padding:10px 12px;background:#fff;color:var(--ink);outline:none;font-size:12px}.toolbar input{min-width:220px;flex:1}.table-wrap{overflow:auto}table{border-collapse:collapse;width:100%;min-width:600px}th,td{text-align:left;padding:12px 10px;border-bottom:1px solid var(--line);font-size:11px}th{color:var(--muted);font-size:10px;text-transform:uppercase;letter-spacing:.7px}.empty-row{text-align:center;color:var(--muted);padding:30px}.cards{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}.info-card{border:1px solid var(--line);border-radius:13px;padding:16px;background:#fff}.info-card h4{margin:0 0 6px;font-size:13px}.info-card p{margin:0;color:var(--muted);font-size:11px;line-height:1.6}.tag{display:inline-block;background:#f2f5f2;color:#637067;padding:5px 8px;border-radius:20px;font-size:10px;margin-top:12px}.settings-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}.field{display:grid;gap:7px;margin:12px 0}.field label{font-size:11px;font-weight:750;color:#566158}.field input,.field select{width:100%}.muted-note{font-size:11px;color:var(--muted);line-height:1.6}.mobile-head{display:none}
+@media(max-width:900px){.sidebar{width:215px}.main{margin-left:215px;width:calc(100% - 215px);padding:22px}.stats{grid-template-columns:repeat(2,1fr)}.grid2{grid-template-columns:1fr}}
+@media(max-width:620px){.sidebar{width:100%;height:auto;inset:auto 0 0 0;padding:7px 6px calc(7px + env(safe-area-inset-bottom));display:block;border-top:1px solid #344038}.brand,.nav-label,.side-bottom{display:none}.nav{display:flex;justify-content:space-around;gap:2px}.nav button{display:flex;flex-direction:column;gap:3px;padding:7px 5px;flex:1;text-align:center;font-size:9px;border-radius:8px}.nav .ico{font-size:17px}.main{margin:0;width:100%;padding:18px 14px 100px}.topbar{margin-bottom:18px}.top-right{gap:7px}.preview{font-size:9px;padding:7px 9px}.stats{gap:9px}.stat{padding:13px}.stat b{font-size:23px}.stat-top{font-size:10px}.welcome{align-items:flex-start;gap:8px;flex-direction:column}.quick{grid-template-columns:repeat(2,1fr)}.cards,.settings-grid{grid-template-columns:1fr}.panel{padding:14px}}
+</style>
+</head>
+<body>
+<div class="app">
+<aside class="sidebar">
+ <div class="brand"><div class="brandmark">T</div><div><strong>TIFO</strong><small>ADMIN PANEL</small></div></div>
+ <div class="nav-label">WORKSPACE</div>
+ <nav class="nav" id="nav">
+  <button class="active" data-page="overview"><span class="ico">▦</span>Overview</button>
+  <button data-page="food"><span class="ico">🍱</span>Food Orders</button>
+  <button data-page="parcel"><span class="ico">📦</span>Parcel Orders</button>
+  <button data-page="payments"><span class="ico">₹</span>Payments</button>
+  <button data-page="customers"><span class="ico">♙</span>Customers</button>
+  <button data-page="support"><span class="ico">☏</span>Support</button>
+  <button data-page="menu"><span class="ico">☷</span>Menu & Plans</button>
+  <button data-page="settings"><span class="ico">⚙</span>Settings</button>
+ </nav>
+ <div class="side-bottom">TIFO Admin<br>Ghar Jaisa Khana • Rozana<br><span style="color:#748078">Dashboard preview · v1</span></div>
+</aside>
+<main class="main">
+ <header class="topbar"><div><div class="crumb">TIFO / <span id="crumb">Overview</span></div><h1 id="title">Dashboard Overview</h1></div><div class="top-right"><span class="preview">PREVIEW MODE</span><div class="avatar">A</div></div></header>
+ <div class="notice"><strong>Setup pending:</strong> Yeh dashboard ka pehla design hai. Abhi Firebase, secure admin login aur live customer orders connect nahi hue hain. Isliye yahan koi fake order ya payment data nahi dikhaya ja raha.</div>
+ <section class="page active" id="overview">
+  <div class="welcome"><div><h2>Good day, Admin 👋</h2><p>Yahan se TIFO ke orders aur operations manage honge.</p></div><span class="date">Live data: connection pending</span></div>
+  <div class="stats">
+   <div class="stat"><div class="stat-top">Total Orders <span class="stat-icon">🧾</span></div><b>—</b><small>Firebase connect hone par dikhega</small></div>
+   <div class="stat"><div class="stat-top">Today's Orders <span class="stat-icon">📅</span></div><b>—</b><small>Live count abhi available nahi</small></div>
+   <div class="stat"><div class="stat-top">Pending Orders <span class="stat-icon">⏳</span></div><b>—</b><small>Live count abhi available nahi</small></div>
+   <div class="stat"><div class="stat-top">Total Revenue <span class="stat-icon">₹</span></div><b>—</b><small>Verified payments ke baad</small></div>
+  </div>
+  <div class="grid2">
+   <div class="panel"><div class="panel-head"><div><h3>Recent Orders</h3><div class="sub">Latest food and parcel requests</div></div><span class="pill">LIVE · PENDING</span></div><div class="empty"><div class="empty-icon">🧾</div><b>Orders yahan dikhenge</b><p>Customer website ko Firebase se connect karne ke baad naye orders is list mein aayenge.</p></div></div>
+   <div class="panel"><div class="panel-head"><div><h3>Order Summary</h3><div class="sub">Current order status</div></div></div><div class="empty"><div class="empty-icon">📊</div><b>Abhi koi live data nahi</b><p>Order status aur sales summary connection ke baad update hogi.</p></div></div>
+  </div>
+  <div class="panel"><div class="panel-head"><div><h3>Quick Access</h3><div class="sub">Open a management section</div></div></div><div class="quick">
+   <button data-go="food"><span>🍱</span><b>Food Orders</b><small>Daily & monthly tiffin</small></button>
+   <button data-go="parcel"><span>📦</span><b>Send Anything</b><small>Pickup & delivery parcels</small></button>
+   <button data-go="payments"><span>₹</span><b>Payments</b><small>UPI payment review</small></button>
+   <button data-go="support"><span>💬</span><b>Customer Support</b><small>Help messages</small></button>
+   <button data-go="menu"><span>🥗</span><b>Menu & Plans</b><small>Products and pricing</small></button>
+   <button data-go="settings"><span>⚙️</span><b>Settings</b><small>Business configuration</small></button>
+  </div></div>
+ </section>
+ <section class="page" id="food"><div class="panel"><div class="panel-head"><div><h3>Food Orders</h3><div class="sub">Daily Tiffin and Monthly Plans</div></div><span class="pill">CONNECTION PENDING</span></div><div class="toolbar"><input placeholder="Search customer, mobile or order ID" disabled><select disabled><option>All statuses</option></select><select disabled><option>All order types</option><option>Daily Tiffin</option><option>Monthly Plan</option></select></div><div class="empty"><div class="empty-icon">🍱</div><b>Food orders yahan milenge</b><p>Customer name, phone, address, selected sabzi, roti, extras, delivery slot, amount aur order status yahan manage honge.</p></div></div></section>
+ <section class="page" id="parcel"><div class="panel"><div class="panel-head"><div><h3>Send Anything / Parcel Orders</h3><div class="sub">Pickup, receiver and parcel information</div></div><span class="pill">CONNECTION PENDING</span></div><div class="empty"><div class="empty-icon">📦</div><b>Parcel requests yahan aayengi</b><p>Sender details, pickup GPS, receiver details, pinned delivery location, parcel photo, weight, distance aur delivery charge yahan dikhenge.</p></div></div></section>
+ <section class="page" id="payments"><div class="panel"><div class="panel-head"><div><h3>Payment Management</h3><div class="sub">UPI payment review and verification</div></div><span class="pill">CONNECTION PENDING</span></div><div class="empty"><div class="empty-icon">₹</div><b>Payment records yahan honge</b><p>Payment reference/UTR, submitted proof, amount aur verification status yahan review hoga. Screenshot apne aap payment verify nahi karta.</p></div></div></section>
+ <section class="page" id="customers"><div class="panel"><div class="panel-head"><div><h3>Customers</h3><div class="sub">Customer details and order history</div></div><span class="pill">CONNECTION PENDING</span></div><div class="empty"><div class="empty-icon">♙</div><b>Customer list abhi khaali hai</b><p>Firebase connect hone par customer contact details aur unki order history yahan aayegi.</p></div></div></section>
+ <section class="page" id="support"><div class="panel"><div class="panel-head"><div><h3>Customer Support</h3><div class="sub">Help requests from the TIFO website</div></div><span class="pill">CONNECTION PENDING</span></div><div class="empty"><div class="empty-icon">💬</div><b>Support messages yahan aayenge</b><p>Customer ka message, mobile number, received time aur reply action yahan manage hoga.</p></div></div></section>
+ <section class="page" id="menu"><div class="panel-head"><div><h3>Menu & Plans</h3><div class="sub">Current TIFO catalogue structure</div></div><span class="pill">VIEW ONLY</span></div><div class="cards">
+  <div class="info-card"><h4>Daily Tiffin</h4><p>Base price ₹150<br>Choose exactly 2 sabzis<br>Rice, boondi raita, salad & pickle included<br>Butter roti ₹15 · Water bottle ₹20</p><span class="tag">UPI prepaid only</span></div>
+  <div class="info-card"><h4>Monthly 3-Time Plan</h4><p>30 days · ₹12,000<br>Meals at 10 AM, 2 PM and 10 PM<br>Plain rice and boondi raita included</p><span class="tag">Monthly subscription</span></div>
+  <div class="info-card"><h4>Monthly + Butter Roti</h4><p>30 days · ₹13,800<br>Includes 4 butter rotis daily<br>Base plan plus butter roti add-on</p><span class="tag">Monthly subscription</span></div>
+  <div class="info-card"><h4>Send Anything</h4><p>Normal parcel: first 2 km ₹30, then ₹20 per extra km<br>Up to 5 kg; above 5 kg extra ₹10/kg<br>Lunch Box/Documents up to 3 kg: first 2 km ₹20, then ₹15/km</p><span class="tag">Distance based delivery</span></div>
+ </div><p class="muted-note">Yeh abhi reference information hai. Dashboard se prices edit karne ka feature Firebase setup ke baad banega.</p></section>
+ <section class="page" id="settings"><div class="panel"><div class="panel-head"><div><h3>Business Settings</h3><div class="sub">Current values planned for TIFO</div></div><span class="pill">VIEW ONLY</span></div><div class="settings-grid">
+  <div class="field"><label>UPI ID</label><input value="9458834146@ybl" readonly></div>
+  <div class="field"><label>WhatsApp Support</label><input value="7599044129" readonly></div>
+  <div class="field"><label>Payment Mode</label><input value="UPI Prepaid Only · No COD" readonly></div>
+  <div class="field"><label>Admin Access</label><input value="Single admin account (to be secured)" readonly></div>
+ </div><p class="muted-note">Secure login, Firebase configuration, business hours and editable delivery rates next setup phase mein add honge.</p></div></section>
+</main>
+</div>
+<script>
+const labels={overview:"Overview",food:"Food Orders",parcel:"Parcel Orders",payments:"Payments",customers:"Customers",support:"Support",menu:"Menu & Plans",settings:"Settings"};
+function showPage(id){if(!labels[id])return;document.querySelectorAll(".page").forEach(p=>p.classList.toggle("active",p.id===id));document.querySelectorAll(".nav button").forEach(b=>b.classList.toggle("active",b.dataset.page===id));document.getElementById("crumb").textContent=labels[id];document.getElementById("title").textContent=id==="overview"?"Dashboard Overview":labels[id];window.scrollTo({top:0,behavior:"smooth"});}
+document.querySelectorAll("[data-page]").forEach(b=>b.addEventListener("click",()=>showPage(b.dataset.page)));
+document.querySelectorAll("[data-go]").forEach(b=>b.addEventListener("click",()=>showPage(b.dataset.go)));
+</script>
+</body>
+</html>
