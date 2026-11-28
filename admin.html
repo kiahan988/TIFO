@@ -101,7 +101,7 @@ document.querySelectorAll("[data-go]").forEach(b=>b.addEventListener("click",()=
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 <script>
 (function(){
- const firebaseConfig={apiKey:"AIzaSyBtYjiDSJjAEwHF8nxwHnW4pZELp37PNG1I",authDomain:"tifo-cf712.firebaseapp.com",projectId:"tifo-cf712",storageBucket:"tifo-cf712.firebasestorage.app",messagingSenderId:"299559256336",appId:"1:299559256336:web:cb267b927dcd4090e76595",measurementId:"G-SGSJ7VFQKH"};
+ const firebaseConfig={apiKey:"AIzaSyBtYjiDSJjAEwHF8nxhWn4pZELp37PNG1I",authDomain:"tifo-cf712.firebaseapp.com",projectId:"tifo-cf712",storageBucket:"tifo-cf712.firebasestorage.app",messagingSenderId:"299559256336",appId:"1:299559256336:web:cb267b927dcd4090e76595",measurementId:"G-SGSJ7VFQKH"};
  const ADMIN_UID="DicY4PAU4uRWnBUXTybKlJnKbxg1";
  const ADMIN_EMAIL="kishangihar8@gmail.com";
  let auth,db,unsubscribe=null,allOrders=[];
@@ -146,8 +146,6 @@ document.querySelectorAll("[data-go]").forEach(b=>b.addEventListener("click",()=
  async function startAdmin(user){
   if(user.uid!==ADMIN_UID||user.email!==ADMIN_EMAIL){await auth.signOut();gate.style.display="grid";showError("Is account ko TIFO Admin permission nahi hai.");return;}
   try{
-   const doc=await db.collection("admins").doc(user.uid).get();
-   if(!doc.exists||doc.data().role!=="admin"||doc.data().email!==ADMIN_EMAIL){await auth.signOut();gate.style.display="grid";showError("Admin permission record verify nahi hua.");return;}
    gate.style.display="none";setState("LIVE");
    document.getElementById("adminNotice").innerHTML="<strong>Connected:</strong> Firebase live orders enabled. Payment screenshots/UPI payments ko manually verify karein.";
    if(unsubscribe)unsubscribe();
