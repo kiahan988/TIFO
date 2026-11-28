@@ -181,6 +181,15 @@ footer{text-align:center;padding:25px 15px;color:var(--muted);font-size:12px}
  .form-grid{grid-template-columns:1fr}
 }
 
+
+.gps-welcome-overlay{position:fixed;inset:0;z-index:2147483646;background:rgba(25,18,14,.72);display:none;align-items:center;justify-content:center;padding:18px}
+.gps-welcome-modal{width:min(420px,100%);background:#fffaf3;border:2px solid #f2c8b8;border-radius:20px;padding:24px 20px;text-align:center;box-shadow:0 18px 60px rgba(0,0,0,.28)}
+.gps-welcome-modal .gps-icon{font-size:44px}
+.gps-welcome-modal h2{margin:8px 0;color:#211c18;font-size:22px}
+.gps-welcome-modal p{color:#665b52;font-size:14px;line-height:1.5;margin:8px 0 16px}
+.gps-welcome-actions{display:grid;gap:9px}
+.gps-welcome-actions button{width:100%}
+
 /* Send Anything first-visit popup */
 .send-anything-overlay{position:fixed!important;inset:0!important;z-index:2147483647!important;background:rgba(25,18,14,.72)!important;display:flex!important;align-items:center;justify-content:center;padding:18px;}
 .send-anything-modal{position:relative;width:min(440px,100%);background:#fffaf3;border:2px solid #f2c8b8;border-radius:22px;padding:26px 22px 22px;text-align:center;box-shadow:0 18px 60px rgba(0,0,0,.28);animation:sendPopupIn .25s ease-out;}
@@ -234,6 +243,18 @@ footer{text-align:center;padding:25px 15px;color:var(--muted);font-size:12px}
   <p>Ghar se jo bhejna ho, hum pickup karke receiver tak pahunchayenge.</p>
   <div class="send-anything-items"><span>📦 Parcel</span><span>📄 Documents</span><span>🍱 Lunch Box</span><span>🪪 Aadhaar Card</span><span>✨ Kuch bhi</span></div>
   <button class="btn popup-book" type="button" onclick="openParcelFromPopup()">Book Parcel Delivery →</button>
+ </div>
+</div>
+
+<div class="gps-welcome-overlay" id="gpsWelcomePopup" role="dialog" aria-modal="true" aria-labelledby="gpsWelcomeTitle">
+ <div class="gps-welcome-modal">
+  <div class="gps-icon">📍</div><h2 id="gpsWelcomeTitle">Share your current location</h2>
+  <p>TIFO aapki asli GPS location ka use pickup/delivery address sahi bharne ke liye karega. Aapki permission ke bina location nahi milegi.</p>
+  <div class="gps-welcome-actions">
+   <button class="btn" type="button" onclick="requestWelcomeLocation()">Allow Location</button>
+   <button class="btn light" type="button" onclick="closeGpsWelcomePopup()">Not Now</button>
+  </div>
+  <p id="gpsWelcomeStatus" class="location-status" aria-live="polite"></p>
  </div>
 </div>
 
@@ -366,8 +387,7 @@ footer{text-align:center;padding:25px 15px;color:var(--muted);font-size:12px}
   </div>
   <label>Delivery Address</label><textarea id="dailyAddress" placeholder="House number, area, landmark..." oninput="clearSelectedLocation('dailyAddress','dailyLocationStatus')"></textarea>
   <button type="button" class="location-btn" onclick="useCurrentLocation('dailyAddress','dailyLocationStatus')">📍 Use My Current Location (GPS)</button>
-  <button type="button" class="location-btn" onclick="openParcelMap('dailyAddress','dailyLocationStatus')">🗺️ Select Location on Map</button>
-  <p class="location-status" id="dailyLocationStatus" aria-live="polite"></p>
+    <p class="location-status" id="dailyLocationStatus" aria-live="polite"></p>
   <label>Meal Timing</label>
   <select id="dailyMeal"><option value="Lunch">Lunch</option><option value="Dinner">Dinner</option></select>
   <p class="muted">Rice, boondi raita, salad aur pickle tiffin mein included hain.</p>
@@ -394,8 +414,7 @@ footer{text-align:center;padding:25px 15px;color:var(--muted);font-size:12px}
   </div>
   <label>Full Delivery Address</label><textarea id="monthlyAddress" placeholder="House number, area, landmark..." oninput="clearSelectedLocation('monthlyAddress','monthlyLocationStatus')"></textarea>
   <button type="button" class="location-btn" onclick="useCurrentLocation('monthlyAddress','monthlyLocationStatus')">📍 Use My Current Location (GPS)</button>
-  <button type="button" class="location-btn" onclick="openParcelMap('monthlyAddress','monthlyLocationStatus')">🗺️ Select Location on Map</button>
-  <p class="location-status" id="monthlyLocationStatus" aria-live="polite"></p>
+    <p class="location-status" id="monthlyLocationStatus" aria-live="polite"></p>
   <div class="form-grid">
    <div><label>Plan Start Date</label><input id="monthlyStart" type="date"></div>
    <div><label>Meal Timing</label><select id="monthlyMeal"><option>Lunch</option><option>Dinner</option><option>All Meals</option></select></div>
@@ -416,8 +435,7 @@ footer{text-align:center;padding:25px 15px;color:var(--muted);font-size:12px}
   </div>
   <label>Pickup Address</label><textarea id="parcelPickupAddress" placeholder="House number, area, colony, landmark..." oninput="clearSelectedLocation('parcelPickupAddress','parcelPickupStatus');invalidateParcelQuote()"></textarea>
   <button type="button" class="location-btn" onclick="useCurrentLocation('parcelPickupAddress','parcelPickupStatus')">📍 Use My Current Location (GPS)</button>
-  <button type="button" class="location-btn" onclick="openParcelMap('parcelPickupAddress','parcelPickupStatus')">🗺️ Select Pickup Location on Map</button>
-  <p class="location-status" id="parcelPickupStatus" aria-live="polite"></p>
+    <p class="location-status" id="parcelPickupStatus" aria-live="polite"></p>
  </div>
  <div class="panel">
   <h3>2. Receiver Details (Delivery)</h3>
@@ -485,6 +503,24 @@ footer{text-align:center;padding:25px 15px;color:var(--muted);font-size:12px}
 <div class="toast" id="toast"></div>
 
 <script>
+
+let tifoInitialLocation=null;
+function showGpsWelcomePopup(){const p=document.getElementById("gpsWelcomePopup");if(p&&!sessionStorage.getItem("tifoGpsPromptDismissed"))p.style.display="flex";}
+function closeGpsWelcomePopup(){const p=document.getElementById("gpsWelcomePopup");if(p)p.style.display="none";sessionStorage.setItem("tifoGpsPromptDismissed","1");}
+function requestWelcomeLocation(){
+ const status=document.getElementById("gpsWelcomeStatus");
+ if(!navigator.geolocation){status.textContent="Is browser mein GPS available nahi hai.";return;}
+ if(!window.isSecureContext){status.textContent="TIFO ko HTTPS link se kholein.";return;}
+ status.textContent="Phone GPS se location li ja rahi hai...";
+ navigator.geolocation.getCurrentPosition(p=>{
+  tifoInitialLocation={lat:p.coords.latitude,lon:p.coords.longitude};closeGpsWelcomePopup();
+  toast("Current GPS location mil gayi. Order ke waqt address mein use ho jayegi.");
+ },e=>{
+  status.textContent=e.code===1?"Location permission block hai. Chrome mein TIFO ki Location permission Allow karein.":e.code===2?"Phone ki location nahi mil rahi. GPS on karke dobara try karein.":"GPS ko zyada samay laga. Dobara try karein.";
+ },{enableHighAccuracy:true,timeout:25000,maximumAge:0});
+}
+if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",showGpsWelcomePopup);else showGpsWelcomePopup();
+
 function showSendAnythingPopup(){
  const popup=document.getElementById("sendAnythingPopup");
  if(popup){popup.style.setProperty("display","flex","important");popup.style.setProperty("z-index","2147483647","important");}
@@ -725,13 +761,23 @@ function clearSelectedLocation(addressId,statusId){
 function requireCurrentLocation(addressId,statusId,label){
  const status=document.getElementById(statusId);
  if(tifoLocations[addressId] && Number.isFinite(tifoLocations[addressId].lat) && Number.isFinite(tifoLocations[addressId].lon)) return true;
- if(status) status.textContent=label+" ki location zaroori hai. Current Location lein ya Map par pin select karein.";
- toast(label+" ki location select karein: GPS ya Map pin.");
+ if(status) status.textContent=label+" ki asli GPS location zaroori hai. Current Location button dabayein.";
+ toast(label+" ki asli GPS location share karein.");
  return false;
 }
 
 function useCurrentLocation(addressId,statusId){
  const status=document.getElementById(statusId), address=document.getElementById(addressId);
+ if(tifoInitialLocation){
+  const {lat,lon}=tifoInitialLocation;tifoLocations[addressId]={lat,lon};address.dataset.locationAllowed="true";
+  address.value="GPS Location ("+lat.toFixed(6)+", "+lon.toFixed(6)+") — Add house/flat number and landmark.";
+  if(status)status.textContent="GPS location mil gayi. Address verify ho raha hai...";
+  fetch("https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat="+encodeURIComponent(lat)+"&lon="+encodeURIComponent(lon))
+   .then(r=>{if(!r.ok)throw new Error("lookup");return r.json();})
+   .then(d=>{if(d.display_name)address.value=d.display_name;if(status)status.textContent="GPS verified. Ghar/flat number aur landmark check kar lein.";})
+   .catch(()=>{if(status)status.textContent="GPS mil gaya. Ghar/flat number aur landmark add karein.";});
+  return;
+ }
  if(!navigator.geolocation){if(status)status.textContent="Is browser mein GPS location support nahi hai.";toast("GPS location support nahi hai.");return;}
  if(!window.isSecureContext){if(status)status.textContent="Location ke liye secure HTTPS website zaroori hai.";toast("TIFO ko HTTPS link se kholein.");return;}
  if(status)status.textContent="Phone ki location permission maangi ja rahi hai...";
@@ -750,9 +796,9 @@ function useCurrentLocation(addressId,statusId){
  },e=>{
   delete tifoLocations[addressId];
   address.dataset.locationAllowed="false";
-  const msg=e.code===1?"GPS permission nahi mili. Koi baat nahi — neeche “Select Location on Map” dabakar bina GPS ke pin laga sakte hain.":e.code===2?"Phone ki location nahi mil rahi. GPS dobara try karein ya Map par pin select karein.":e.code===3?"GPS ko zyada samay laga. Map par pin select kar sakte hain.":"Current location nahi mil saki. Map par pin select karein.";
+  const msg=e.code===1?"Location permission block hai. Chrome mein TIFO ki Location permission Allow karein.":e.code===2?"Phone ki location nahi mil rahi. GPS on karke dobara try karein.":e.code===3?"GPS ko zyada samay laga. Dobara try karein.":"Current location nahi mil saki. Dobara try karein.";
   if(status)status.textContent=msg;
-  toast(e.code===1?"GPS nahi mila — Map par pin select karein.":msg);
+  toast(msg);
  },{enableHighAccuracy:true,timeout:30000,maximumAge:0});
 }
 
