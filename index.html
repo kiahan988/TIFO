@@ -252,6 +252,7 @@ footer{text-align:center;padding:25px 15px;color:var(--muted);font-size:12px}
   <p>TIFO aapki asli GPS location ka use pickup/delivery address sahi bharne ke liye karega. Aapki permission ke bina location nahi milegi.</p>
   <div class="gps-welcome-actions">
    <button class="btn" type="button" onclick="requestWelcomeLocation()">Allow Location</button>
+   <button class="btn light" type="button" id="openChromeLocationSettings" onclick="openTifoChromeLocationSettings()" style="display:none">Enable Location in Chrome</button>
    <button class="btn light" type="button" onclick="closeGpsWelcomePopup()">Not Now</button>
   </div>
   <p id="gpsWelcomeStatus" class="location-status" aria-live="polite"></p>
@@ -518,8 +519,19 @@ function requestWelcomeLocation(){
   closeGpsWelcomePopup();
   toast("Current GPS location mil gayi.");
  },e=>{
-  if(status)status.textContent=e.code===1?"Location permission block hai. Chrome mein TIFO ki Location permission Allow karein.":e.code===2?"Phone ki location nahi mil rahi. GPS on karke dobara try karein.":"GPS ko zyada samay laga. Dobara try karein.";
+  if(e.code===1){
+   if(status)status.textContent="Chrome ne TIFO ki location block kar di hai. Neeche button se Chrome settings kholne ki koshish karein.";
+   const settingsBtn=document.getElementById("openChromeLocationSettings");if(settingsBtn)settingsBtn.style.display="block";
+  }else if(status)status.textContent=e.code===2?"Phone ki location nahi mil rahi. GPS on karke dobara try karein.":"GPS ko zyada samay laga. Dobara try karein.";
  },{enableHighAccuracy:true,timeout:25000,maximumAge:0});
+}
+function openTifoChromeLocationSettings(){
+ const status=document.getElementById("gpsWelcomeStatus");
+ const settingsUrl="chrome://settings/content/siteDetails?site="+encodeURIComponent("https://kiahan988.github.io");
+ // Try opening Chrome's site-specific settings from a direct user tap.
+ let opened=false;
+ try{const w=window.open(settingsUrl,"_blank");opened=!!w;}catch(e){}
+ if(status)status.textContent="Agar Chrome settings nahi khulti, Chrome ke address bar mein chrome://settings/content/siteDetails?site=https%3A%2F%2Fkiahan988.github.io kholein. Phir Location ko Allow karein aur TIFO par lautkar Allow Location dabayein.";
 }
 if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",showGpsWelcomePopup);else showGpsWelcomePopup();
 
