@@ -505,6 +505,7 @@ footer{text-align:center;padding:25px 15px;color:var(--muted);font-size:12px}
 
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
 <script>
 const tifoFirebaseConfig = {
  apiKey: "AIzaSyBtYjiDSJjAEwHF8nxhWn4pZELp37PNG1I",
@@ -516,9 +517,11 @@ const tifoFirebaseConfig = {
  measurementId: "G-SGSJ7VFQKH"
 };
 let tifoDb = null;
+let tifoAuth = null;
 try {
  if (!firebase.apps.length) firebase.initializeApp(tifoFirebaseConfig);
  tifoDb = firebase.firestore();
+ tifoAuth = firebase.auth();
 } catch (firebaseInitError) {
  console.error("TIFO Firebase initialization failed:", firebaseInitError);
 }
@@ -618,8 +621,9 @@ function saveOrders(){
 }
 
 async function syncOrderToFirebase(order){
- if(!tifoDb){toast("Firebase connect nahi hua. Order is device par save hai.");return false;}
+ if(!tifoDb || !tifoAuth){toast("Firebase connect nahi hua. Order is device par save hai.");return false;}
  try{
+  if(!tifoAuth.currentUser) await tifoAuth.signInAnonymously();
   const safeOrder={...order};
   safeOrder.items=(order.items||[]).map(item=>{
    const safeItem={...item};
