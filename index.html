@@ -365,7 +365,8 @@ footer{text-align:center;padding:25px 15px;color:var(--muted);font-size:12px}
    <div><label>Mobile Number</label><input id="dailyPhone" type="tel" maxlength="10" placeholder="10 digit mobile number"></div>
   </div>
   <label>Delivery Address</label><textarea id="dailyAddress" placeholder="House number, area, landmark..." oninput="clearSelectedLocation('dailyAddress','dailyLocationStatus')"></textarea>
-  <button type="button" class="location-btn" onclick="useCurrentLocation('dailyAddress','dailyLocationStatus')">📍 Use My Current Location</button>
+  <button type="button" class="location-btn" onclick="useCurrentLocation('dailyAddress','dailyLocationStatus')">📍 Use My Current Location (GPS)</button>
+  <button type="button" class="location-btn" onclick="openParcelMap('dailyAddress','dailyLocationStatus')">🗺️ Select Location on Map</button>
   <p class="location-status" id="dailyLocationStatus" aria-live="polite"></p>
   <label>Meal Timing</label>
   <select id="dailyMeal"><option value="Lunch">Lunch</option><option value="Dinner">Dinner</option></select>
@@ -392,7 +393,8 @@ footer{text-align:center;padding:25px 15px;color:var(--muted);font-size:12px}
    <div><label>Mobile Number</label><input id="monthlyPhone" type="tel" maxlength="10" placeholder="10 digit mobile number"></div>
   </div>
   <label>Full Delivery Address</label><textarea id="monthlyAddress" placeholder="House number, area, landmark..." oninput="clearSelectedLocation('monthlyAddress','monthlyLocationStatus')"></textarea>
-  <button type="button" class="location-btn" onclick="useCurrentLocation('monthlyAddress','monthlyLocationStatus')">📍 Use My Current Location</button>
+  <button type="button" class="location-btn" onclick="useCurrentLocation('monthlyAddress','monthlyLocationStatus')">📍 Use My Current Location (GPS)</button>
+  <button type="button" class="location-btn" onclick="openParcelMap('monthlyAddress','monthlyLocationStatus')">🗺️ Select Location on Map</button>
   <p class="location-status" id="monthlyLocationStatus" aria-live="polite"></p>
   <div class="form-grid">
    <div><label>Plan Start Date</label><input id="monthlyStart" type="date"></div>
@@ -413,7 +415,8 @@ footer{text-align:center;padding:25px 15px;color:var(--muted);font-size:12px}
    <div><label>Sender Mobile</label><input id="parcelSenderPhone" type="tel" maxlength="10" placeholder="10 digit mobile number" oninput="invalidateParcelQuote()"></div>
   </div>
   <label>Pickup Address</label><textarea id="parcelPickupAddress" placeholder="House number, area, colony, landmark..." oninput="clearSelectedLocation('parcelPickupAddress','parcelPickupStatus');invalidateParcelQuote()"></textarea>
-  <button type="button" class="location-btn" onclick="useCurrentLocation('parcelPickupAddress','parcelPickupStatus')">📍 Use My Current Location</button>
+  <button type="button" class="location-btn" onclick="useCurrentLocation('parcelPickupAddress','parcelPickupStatus')">📍 Use My Current Location (GPS)</button>
+  <button type="button" class="location-btn" onclick="openParcelMap('parcelPickupAddress','parcelPickupStatus')">🗺️ Select Pickup Location on Map</button>
   <p class="location-status" id="parcelPickupStatus" aria-live="polite"></p>
  </div>
  <div class="panel">
@@ -557,8 +560,9 @@ function openParcelMap(addressId,statusId){
  parcelMapChosen=hasPin?{lat:existing.lat,lon:existing.lon}:null;
  const search=document.getElementById("parcelMapSearch");
  const searchStatus=document.getElementById("parcelMapSearchStatus");
- if(search)search.value="";
- if(searchStatus)searchStatus.textContent=hasPin?"Pehle se selected location map par dikh rahi hai.":"PIN code ya area search karein, ya map par exact jagah tap karein.";
+ const addressField=document.getElementById(addressId);
+ if(search)search.value=hasPin?"":(addressField?(addressField.value||"").trim():"");
+ if(searchStatus)searchStatus.textContent=hasPin?"Pehle se selected location map par dikh rahi hai.":(search&&search.value?"Address bhar diya hai — Search dabayein, phir map par pin confirm karein.":"Address/PIN search karein ya map par exact jagah tap karein.");
  document.getElementById("parcelMapOverlay").style.display="flex";
  setTimeout(()=>{
   if(!window.L){toast("Map load nahi hua. Internet check karke dobara try karein.");return;}
@@ -746,9 +750,9 @@ function useCurrentLocation(addressId,statusId){
  },e=>{
   delete tifoLocations[addressId];
   address.dataset.locationAllowed="false";
-  const msg=e.code===1?"Location permission block hai. Phone/Chrome mein TIFO site ki Location permission Allow karein. Phir isi button ko dobara dabayein.":e.code===2?"Phone ki Location/GPS ON karein aur dobara try karein.":e.code===3?"GPS ko time out hua. Location ON karke dobara button dabayein.":"Current location nahi mil saki. GPS aur permission check karein.";
+  const msg=e.code===1?"GPS permission nahi mili. Koi baat nahi — neeche “Select Location on Map” dabakar bina GPS ke pin laga sakte hain.":e.code===2?"Phone ki location nahi mil rahi. GPS dobara try karein ya Map par pin select karein.":e.code===3?"GPS ko zyada samay laga. Map par pin select kar sakte hain.":"Current location nahi mil saki. Map par pin select karein.";
   if(status)status.textContent=msg;
-  toast(msg);
+  toast(e.code===1?"GPS nahi mila — Map par pin select karein.":msg);
  },{enableHighAccuracy:true,timeout:30000,maximumAge:0});
 }
 
