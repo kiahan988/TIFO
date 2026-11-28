@@ -182,7 +182,7 @@ footer{text-align:center;padding:25px 15px;color:var(--muted);font-size:12px}
 }
 
 
-.gps-welcome-overlay{position:fixed;inset:0;z-index:2147483646;background:rgba(25,18,14,.72);display:none;align-items:center;justify-content:center;padding:18px}
+.gps-welcome-overlay{position:fixed;inset:0;z-index:2147483647;background:rgba(25,18,14,.72);display:none;align-items:center;justify-content:center;padding:18px}
 .gps-welcome-modal{width:min(420px,100%);background:#fffaf3;border:2px solid #f2c8b8;border-radius:20px;padding:24px 20px;text-align:center;box-shadow:0 18px 60px rgba(0,0,0,.28)}
 .gps-welcome-modal .gps-icon{font-size:44px}
 .gps-welcome-modal h2{margin:8px 0;color:#211c18;font-size:22px}
@@ -191,7 +191,7 @@ footer{text-align:center;padding:25px 15px;color:var(--muted);font-size:12px}
 .gps-welcome-actions button{width:100%}
 
 /* Send Anything first-visit popup */
-.send-anything-overlay{position:fixed!important;inset:0!important;z-index:2147483647!important;background:rgba(25,18,14,.72)!important;display:flex!important;align-items:center;justify-content:center;padding:18px;}
+.send-anything-overlay{position:fixed!important;inset:0!important;z-index:2147483645!important;background:rgba(25,18,14,.72)!important;display:flex!important;align-items:center;justify-content:center;padding:18px;}
 .send-anything-modal{position:relative;width:min(440px,100%);background:#fffaf3;border:2px solid #f2c8b8;border-radius:22px;padding:26px 22px 22px;text-align:center;box-shadow:0 18px 60px rgba(0,0,0,.28);animation:sendPopupIn .25s ease-out;}
 .send-anything-modal .parcel-emoji{font-size:54px;line-height:1.2;margin-bottom:10px;}
 .send-anything-modal h2{margin:4px 0 9px;color:#211c18;font-size:25px;}
@@ -509,21 +509,23 @@ function showGpsWelcomePopup(){const p=document.getElementById("gpsWelcomePopup"
 function closeGpsWelcomePopup(){const p=document.getElementById("gpsWelcomePopup");if(p)p.style.display="none";sessionStorage.setItem("tifoGpsPromptDismissed","1");}
 function requestWelcomeLocation(){
  const status=document.getElementById("gpsWelcomeStatus");
- if(!navigator.geolocation){status.textContent="Is browser mein GPS available nahi hai.";return;}
- if(!window.isSecureContext){status.textContent="TIFO ko HTTPS link se kholein.";return;}
- status.textContent="Phone GPS se location li ja rahi hai...";
+ if(!navigator.geolocation){if(status)status.textContent="Is browser mein GPS available nahi hai.";return;}
+ if(!window.isSecureContext){if(status)status.textContent="TIFO ko HTTPS link se kholein.";return;}
+ if(status)status.textContent="Phone GPS se location li ja rahi hai...";
  navigator.geolocation.getCurrentPosition(p=>{
-  tifoInitialLocation={lat:p.coords.latitude,lon:p.coords.longitude};closeGpsWelcomePopup();
-  toast("Current GPS location mil gayi. Order ke waqt address mein use ho jayegi.");
+  tifoInitialLocation={lat:p.coords.latitude,lon:p.coords.longitude};
+  if(status)status.textContent="Location mil gayi. Address bharte waqt use hogi.";
+  closeGpsWelcomePopup();
+  toast("Current GPS location mil gayi.");
  },e=>{
-  status.textContent=e.code===1?"Location permission block hai. Chrome mein TIFO ki Location permission Allow karein.":e.code===2?"Phone ki location nahi mil rahi. GPS on karke dobara try karein.":"GPS ko zyada samay laga. Dobara try karein.";
+  if(status)status.textContent=e.code===1?"Location permission block hai. Chrome mein TIFO ki Location permission Allow karein.":e.code===2?"Phone ki location nahi mil rahi. GPS on karke dobara try karein.":"GPS ko zyada samay laga. Dobara try karein.";
  },{enableHighAccuracy:true,timeout:25000,maximumAge:0});
 }
 if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",showGpsWelcomePopup);else showGpsWelcomePopup();
 
 function showSendAnythingPopup(){
  const popup=document.getElementById("sendAnythingPopup");
- if(popup){popup.style.setProperty("display","flex","important");popup.style.setProperty("z-index","2147483647","important");}
+ if(popup){popup.style.setProperty("display","flex","important");popup.style.setProperty("z-index","2147483645","important");}
 }
 if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",showSendAnythingPopup);}else{showSendAnythingPopup();}
 
